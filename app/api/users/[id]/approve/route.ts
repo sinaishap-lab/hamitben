@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/api-helpers";
+import { notifyUser } from "@/lib/notifications";
 
 export async function PUT(
   _req: Request,
@@ -16,7 +17,7 @@ export async function PUT(
       data: { status: "APPROVED" },
       select: { id: true, status: true },
     });
-    // TODO (Phase 6): notify user (WhatsApp/Push/Email)
+    await notifyUser(user.id, "USER_APPROVED");
     return NextResponse.json({ ok: true, user });
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") {

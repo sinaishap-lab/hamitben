@@ -156,9 +156,10 @@ model Loan {
   totalCharged        Float?
   notes               String?
   adminNotes          String?
-  termsAcknowledgedAt DateTime? // per-loan terms confirmation (§15.2)
-  createdAt           DateTime      @default(now())
-  updatedAt           DateTime      @updatedAt
+  termsAcknowledgedAt     DateTime? // per-loan terms confirmation (§15.2)
+  referralDiscountApplied Boolean       @default(false) // 10% off on RETURNED (§16.2)
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
 
   toolId String
   tool   Tool   @relation(fields: [toolId], references: [id])

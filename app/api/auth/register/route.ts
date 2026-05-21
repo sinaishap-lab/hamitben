@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { registerSchema } from "@/lib/validation";
+import { notifyAdmins } from "@/lib/notifications";
 
 export async function POST(req: Request) {
   let body: unknown;
@@ -51,7 +52,11 @@ export async function POST(req: Request) {
       select: { id: true, name: true, phone: true },
     });
 
-    // TODO (Phase 6): notify admin of new signup via WhatsApp (spec §8.2)
+    // Notify admins about the new signup (spec §8.2)
+    await notifyAdmins("USER_REGISTERED", {
+      name: user.name,
+      phone: user.phone,
+    });
 
     return NextResponse.json({ ok: true, user }, { status: 201 });
   } catch (err) {

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Maskable: the inner 80% (52..460) is the "safe zone" — full background covers edge -->
+  <rect width="512" height="512" fill="#4A7C59"/>
+  <g transform="translate(256 256) scale(0.7)" fill="#D4A843" stroke="#8B5E3C" stroke-width="9" stroke-linejoin="round">
+    <rect x="-6" y="-150" width="12" height="280" rx="4" fill="#8B5E3C" stroke="none"/>
+    <g stroke-linecap="round">
+      <ellipse cx="-32" cy="-110" rx="22" ry="38" transform="rotate(-30 -32 -110)"/>
+      <ellipse cx="32"  cy="-110" rx="22" ry="38" transform="rotate(30 32 -110)"/>
+      <ellipse cx="-36" cy="-50"  rx="22" ry="38" transform="rotate(-30 -36 -50)"/>
+      <ellipse cx="36"  cy="-50"  rx="22" ry="38" transform="rotate(30 36 -50)"/>
+      <ellipse cx="-40" cy="10"   rx="22" ry="38" transform="rotate(-30 -40 10)"/>
+      <ellipse cx="40"  cy="10"   rx="22" ry="38" transform="rotate(30 40 10)"/>
+      <ellipse cx="-44" cy="70"   rx="22" ry="38" transform="rotate(-30 -44 70)"/>
+      <ellipse cx="44"  cy="70"   rx="22" ry="38" transform="rotate(30 44 70)"/>
+      <ellipse cx="0" cy="-150" rx="18" ry="36"/>
+    </g>
+  </g>
+</svg>

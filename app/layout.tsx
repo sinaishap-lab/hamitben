@@ -21,6 +21,22 @@ export const metadata: Metadata = {
     "פלטפורמה לניהול גמחי כלי עבודה חקלאיים – השאלה, פיקדון וניהול קהילתי. מזרח הגוש, תלם, דרום הר חברון.",
   applicationName: "המתבן",
   manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    title: "המתבן",
+    statusBarStyle: "default",
+  },
+  icons: {
+    icon: [
+      { url: "/icon-192.svg", sizes: "192x192", type: "image/svg+xml" },
+      { url: "/icon-512.svg", sizes: "512x512", type: "image/svg+xml" },
+    ],
+    shortcut: "/icon-192.svg",
+    apple: "/icon-192.svg",
+  },
+  formatDetection: {
+    telephone: true,
+  },
 };
 
 export const viewport: Viewport = {

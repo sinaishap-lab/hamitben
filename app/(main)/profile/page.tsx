@@ -7,6 +7,7 @@ import { ProfileEditForm } from "./ProfileEditForm";
 import { ReferralCard } from "./ReferralCard";
 import { DeleteAccountButton } from "./DeleteAccountButton";
 import { BannedAlert } from "./BannedAlert";
+import { EnablePushButton } from "@/components/pwa/EnablePushButton";
 
 export const dynamic = "force-dynamic";
 
@@ -50,12 +51,17 @@ export default async function ProfilePage() {
       />
 
       <section className="bg-bg-surface rounded-2xl border border-primary-100 p-4 flex flex-col gap-3">
+        <h2 className="font-bold">התראות</h2>
+        <EnablePushButton />
+      </section>
+
+      <section className="bg-bg-surface rounded-2xl border border-primary-100 p-4 flex flex-col gap-3">
         <h2 className="font-bold">פעולות</h2>
-        <Link
-          href="/my-loans"
-          className="text-primary text-sm underline"
-        >
+        <Link href="/my-loans" className="text-primary text-sm underline">
           ההשאלות שלי
+        </Link>
+        <Link href="/invite" className="text-primary text-sm underline">
+          הזמן חבר וקבל הנחה
         </Link>
         <Link href="/terms" className="text-primary text-sm underline">
           תנאי השימוש

@@ -51,3 +51,154 @@ export const profileUpdateSchema = z.object({
 });
 
 export type ProfileUpdateInput = z.infer<typeof profileUpdateSchema>;
+
+const optionalCoord = z
+  .union([z.number(), z.string()])
+  .optional()
+  .nullable()
+  .transform((v) => {
+    if (v === undefined || v === null || v === "") return null;
+    const n = typeof v === "string" ? parseFloat(v) : v;
+    return Number.isFinite(n) ? n : null;
+  });
+
+export const gemachCreateSchema = z.object({
+  name: z.string().trim().min(2, "שם קצר מדי").max(80),
+  description: z.string().trim().max(500).optional().nullable(),
+  address: z.string().trim().min(2, "כתובת חסרה").max(200),
+  phone: z
+    .string()
+    .trim()
+    .optional()
+    .nullable()
+    .transform((v) => (v ? normalizeIsraeliPhone(v) : null)),
+  lat: optionalCoord,
+  lng: optionalCoord,
+  imageUrl: z.string().trim().url().optional().nullable(),
+  managerPhone: israeliPhone, // existing user phone (must be APPROVED)
+});
+
+export type GemachCreateInput = z.infer<typeof gemachCreateSchema>;
+
+export const gemachUpdateSchema = gemachCreateSchema.omit({ managerPhone: true }).partial();
+
+export type GemachUpdateInput = z.infer<typeof gemachUpdateSchema>;
+
+const TOOL_CATEGORIES = [
+  "IRRIGATION",
+  "HARVESTING",
+  "SOIL_WORK",
+  "SPRAYING",
+  "PLANTING",
+  "STORAGE",
+  "VEHICLES",
+  "HAND_TOOLS",
+  "OTHER",
+] as const;
+
+const optionalNum = (min: number, max?: number) =>
+  z
+    .union([z.number(), z.string()])
+    .transform((v) => {
+      const n = typeof v === "string" ? parseFloat(v) : v;
+      return Number.isFinite(n) ? n : 0;
+    })
+    .pipe(
+      max !== undefined
+        ? z.number().min(min, `מספר קטן מדי`).max(max, `מספר גדול מדי`)
+        : z.number().min(min, `מספר קטן מדי`)
+    );
+
+export const toolCreateSchema = z.object({
+  name: z.string().trim().min(2, "שם קצר מדי").max(80),
+  description: z.string().trim().max(1000).optional().nullable(),
+  category: z.enum(TOOL_CATEGORIES, { message: "קטגוריה לא חוקית" }),
+  images: z.array(z.string().url()).max(5).default([]),
+  autoApprove: z.boolean().default(false),
+  depositAmount: optionalNum(0).default(0),
+  dailyRate: optionalNum(0).default(0),
+  maxDays: optionalNum(1, 365).default(7),
+  gemachId: z.string().min(1, "גמח חסר"),
+});
+
+export type ToolCreateInput = z.infer<typeof toolCreateSchema>;
+
+export const toolUpdateSchema = toolCreateSchema.omit({ gemachId: true }).partial();
+export type ToolUpdateInput = z.infer<typeof toolUpdateSchema>;
+
+export const toolRequestCreateSchema = z.object({
+  description: z.string().trim().min(3, "תיאור קצר מדי").max(500),
+  category: z.enum(TOOL_CATEGORIES).optional().nullable(),
+  gemachId: z.string().min(1).optional().nullable(),
+});
+export type ToolRequestCreateInput = z.infer<typeof toolRequestCreateSchema>;
+
+const isoDate = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}/, "פורמט תאריך לא חוקי")
+  .transform((s) => new Date(s));
+
+export const loanCreateSchema = z
+  .object({
+    toolId: z.string().min(1, "כלי חסר"),
+    startDate: isoDate,
+    endDate: isoDate,
+    purpose: z.string().trim().max(300).optional().nullable(),
+    termsAcknowledged: z.literal(true, {
+      message: "יש לאשר את תנאי השאלה",
+    }),
+    useDiscountToken: z.boolean().optional().default(false),
+  })
+  .refine((v) => v.endDate >= v.startDate, {
+    message: "תאריך סיום חייב להיות אחרי תאריך התחלה",
+    path: ["endDate"],
+  });
+
+export type LoanCreateInput = z.infer<typeof loanCreateSchema>;
+
+export const loanReturnSchema = z.object({
+  outcome: z.enum(["OK", "OVERDUE"]),
+  notes: z.string().trim().max(500).optional().nullable(),
+});
+export type LoanReturnInput = z.infer<typeof loanReturnSchema>;
+
+export const loanRejectSchema = z.object({
+  reason: z.string().trim().max(300).optional().nullable(),
+});
+
+export const donationSchema = z.object({
+  amount: z
+    .union([z.number(), z.string()])
+    .transform((v) => (typeof v === "string" ? parseFloat(v) : v))
+    .pipe(z.number().int("סכום חייב להיות מספר שלם").min(10, "מינימום ₪10").max(100000)),
+  name: z.string().trim().max(80).optional().nullable(),
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .email("כתובת אימייל לא תקינה")
+    .optional()
+    .nullable(),
+});
+export type DonationInput = z.infer<typeof donationSchema>;
+
+export const gemachRequestSchema = z.object({
+  name: z.string().trim().min(2, "שם קצר מדי").max(80),
+  phone: israeliPhone,
+});
+export type GemachRequestInput = z.infer<typeof gemachRequestSchema>;
+
+export const toolDonationSchema = z.object({
+  donorName: z.string().trim().min(2, "שם קצר מדי").max(80),
+  donorPhone: israeliPhone,
+  toolDesc: z.string().trim().min(3, "תיאור קצר מדי").max(500),
+});
+export type ToolDonationInput = z.infer<typeof toolDonationSchema>;
+
+export const contactSchema = z.object({
+  name: z.string().trim().min(2, "שם קצר מדי").max(80),
+  phone: israeliPhone,
+  subject: z.string().trim().min(2, "נושא חסר").max(120),
+  message: z.string().trim().min(5, "הודעה קצרה מדי").max(2000),
+});
+export type ContactInput = z.infer<typeof contactSchema>;

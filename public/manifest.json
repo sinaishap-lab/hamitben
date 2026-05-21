@@ -1,0 +1,48 @@
+{
+  "name": "המתבן – גמח כלי עבודה חקלאיים",
+  "short_name": "המתבן",
+  "description": "פלטפורמה לניהול גמחי כלי עבודה חקלאיים – השאלה, פיקדון וניהול קהילתי",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F7F3ED",
+  "theme_color": "#4A7C59",
+  "lang": "he",
+  "dir": "rtl",
+  "categories": ["lifestyle", "productivity", "social"],
+  "icons": [
+    {
+      "src": "/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "קטלוג כלים",
+      "short_name": "קטלוג",
+      "url": "/catalog",
+      "icons": [{ "src": "/icon-192.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "ההשאלות שלי",
+      "short_name": "השאלות",
+      "url": "/my-loans",
+      "icons": [{ "src": "/icon-192.svg", "sizes": "192x192" }]
+    }
+  ]
+}
