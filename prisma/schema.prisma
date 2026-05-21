@@ -1,0 +1,311 @@
+// HaMatben (המתבן) – Agricultural tool-lending platform
+// Schema based on spec sections 5, 15-20
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────────────────────────
+// USERS
+// ───────────────────────────────
+model User {
+  id           String     @id @default(cuid())
+  name         String
+  phone        String     @unique
+  email        String     @unique
+  passwordHash String
+  role         UserRole   @default(REGULAR)
+  status       UserStatus @default(PENDING)
+  isBanned     Boolean    @default(false)
+  banReason    String?
+
+  // Terms (spec §15.2)
+  termsSignedAt DateTime?
+  termsVersion  String?
+
+  // Referral (spec §16.2)
+  referralCode   String  @unique @default(cuid())
+  referredById   String?
+  referredBy     User?   @relation("Referrals", fields: [referredById], references: [id])
+  referrals      User[]  @relation("Referrals")
+  discountTokens Int     @default(0)
+
+  // Soft delete
+  deletedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  managedGemach Gemach?       @relation("GemachManager")
+  loans         Loan[]
+  reviews       Review[]
+  pushTokens    PushToken[]
+  waitlist      Waitlist[]
+  toolRequests  ToolRequest[]
+}
+
+enum UserRole {
+  REGULAR
+  GEMACH_MANAGER
+  ADMIN
+}
+
+enum UserStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+// ───────────────────────────────
+// GEMACHS
+// ───────────────────────────────
+model Gemach {
+  id          String     @id @default(cuid())
+  name        String     @unique
+  description String?
+  address     String
+  lat         Float?
+  lng         Float?
+  phone       String?
+  imageUrl    String?
+  type        GemachType @default(AGRICULTURAL) // future-proof (§20.6)
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  managerId    String        @unique
+  manager      User          @relation("GemachManager", fields: [managerId], references: [id])
+  tools        Tool[]
+  reviews      Review[]
+  toolRequests ToolRequest[]
+}
+
+enum GemachType {
+  AGRICULTURAL
+  MEDICAL
+  HOUSEHOLD
+  EVENTS
+  OTHER
+}
+
+// ───────────────────────────────
+// TOOLS
+// ───────────────────────────────
+model Tool {
+  id            String       @id @default(cuid())
+  name          String
+  description   String?
+  category      ToolCategory
+  images        String[] // Cloudinary URLs
+  status        ToolStatus   @default(AVAILABLE)
+  autoApprove   Boolean      @default(false)
+  depositAmount Float        @default(0)
+  dailyRate     Float        @default(0)
+  maxDays       Int          @default(7)
+  isActive      Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  gemachId String
+  gemach   Gemach     @relation(fields: [gemachId], references: [id])
+  loans    Loan[]
+  reviews  Review[]
+  waitlist Waitlist[]
+}
+
+enum ToolCategory {
+  IRRIGATION
+  HARVESTING
+  SOIL_WORK
+  SPRAYING
+  PLANTING
+  STORAGE
+  VEHICLES
+  HAND_TOOLS
+  OTHER
+}
+
+enum ToolStatus {
+  AVAILABLE
+  LOANED
+  MAINTENANCE
+  INACTIVE
+}
+
+// ───────────────────────────────
+// LOANS
+// ───────────────────────────────
+model Loan {
+  id                  String        @id @default(cuid())
+  startDate           DateTime
+  endDate             DateTime
+  actualReturnDate    DateTime?
+  purpose             String?
+  status              LoanStatus    @default(PENDING)
+  depositStatus       DepositStatus @default(NONE)
+  depositChargeId     String? // Cardcom pre-auth token
+  paymentChargeId     String? // Cardcom final charge token
+  depositAmount       Float         @default(0)
+  dailyRate           Float         @default(0)
+  totalCharged        Float?
+  notes               String?
+  adminNotes          String?
+  termsAcknowledgedAt DateTime? // per-loan terms confirmation (§15.2)
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  toolId String
+  tool   Tool   @relation(fields: [toolId], references: [id])
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+enum LoanStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  ACTIVE
+  RETURNED
+  OVERDUE
+  CANCELLED
+}
+
+enum DepositStatus {
+  NONE
+  HELD
+  RELEASED
+  CHARGED
+}
+
+// ───────────────────────────────
+// REVIEWS
+// ───────────────────────────────
+model Review {
+  id        String     @id @default(cuid())
+  rating    Int
+  comment   String?
+  type      ReviewType
+  createdAt DateTime   @default(now())
+
+  userId   String
+  user     User    @relation(fields: [userId], references: [id])
+  toolId   String?
+  tool     Tool?   @relation(fields: [toolId], references: [id])
+  gemachId String?
+  gemach   Gemach? @relation(fields: [gemachId], references: [id])
+}
+
+enum ReviewType {
+  TOOL
+  GEMACH
+}
+
+// ───────────────────────────────
+// PUSH TOKENS
+// ───────────────────────────────
+model PushToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  platform  String
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+// ───────────────────────────────
+// DONATIONS
+// ───────────────────────────────
+model Donation {
+  id        String   @id @default(cuid())
+  amount    Float
+  status    String   @default("PENDING")
+  chargeId  String?
+  name      String?
+  email     String?
+  createdAt DateTime @default(now())
+}
+
+// ───────────────────────────────
+// WAITLIST (spec §20.1)
+// ───────────────────────────────
+model Waitlist {
+  id         String    @id @default(cuid())
+  position   Int
+  notifiedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  toolId String
+  tool   Tool   @relation(fields: [toolId], references: [id])
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@unique([toolId, userId])
+}
+
+// ───────────────────────────────
+// GEMACH REQUESTS (spec §17)
+// ───────────────────────────────
+model GemachRequest {
+  id        String              @id @default(cuid())
+  name      String
+  phone     String
+  status    GemachRequestStatus @default(PENDING)
+  notes     String?
+  createdAt DateTime            @default(now())
+}
+
+enum GemachRequestStatus {
+  PENDING
+  CONTACTED
+  OPENED
+  REJECTED
+}
+
+// ───────────────────────────────
+// TOOL DONATION REQUESTS (spec §18)
+// ───────────────────────────────
+model ToolDonationRequest {
+  id         String                    @id @default(cuid())
+  donorName  String
+  donorPhone String
+  toolDesc   String
+  status     ToolDonationRequestStatus @default(PENDING)
+  notes      String?
+  createdAt  DateTime                  @default(now())
+}
+
+enum ToolDonationRequestStatus {
+  PENDING
+  CONTACTED
+  ACCEPTED
+  DECLINED
+}
+
+// ───────────────────────────────
+// TOOL REQUESTS – "missing tool" (spec §20.4)
+// ───────────────────────────────
+model ToolRequest {
+  id          String            @id @default(cuid())
+  description String
+  category    ToolCategory?
+  status      ToolRequestStatus @default(PENDING)
+  createdAt   DateTime          @default(now())
+
+  userId   String
+  user     User    @relation(fields: [userId], references: [id])
+  gemachId String?
+  gemach   Gemach? @relation(fields: [gemachId], references: [id])
+}
+
+enum ToolRequestStatus {
+  PENDING
+  NOTED
+  FULFILLED
+}

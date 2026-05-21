@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Spec §10 – palette + Heebo */
+:root {
+  --color-primary: #4a7c59;
+  --color-secondary: #8b5e3c;
+  --color-accent: #d4a843;
+  --color-bg: #f7f3ed;
+  --color-surface: #ffffff;
+  --color-text: #2c2416;
+  --color-text-muted: #6b6354;
+  --color-success: #3d8b37;
+  --color-warning: #e6992c;
+  --color-error: #c0392b;
+
+  --background: var(--color-bg);
+  --foreground: var(--color-text);
+}
+
+html,
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: "Heebo", system-ui, sans-serif;
+  direction: rtl;
+  text-align: right;
+}
+
+/* Mobile-safe bottom padding so BottomNav never overlaps */
+body {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Smoother typography for Hebrew */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: var(--color-text-muted);
+    border-radius: 3px;
+  }
+}
