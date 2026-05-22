@@ -125,6 +125,19 @@ export async function PUT(
   // Tool is free again → poke the waitlist (spec §20.1)
   await notifyNextInWaitlist(r.loan.tool.id, r.loan.tool.name);
 
+  // Let everyone who favorited the tool know it's available again
+  // (excluding the borrower who just returned it).
+  const favorites = await prisma.favorite.findMany({
+    where: { toolId: r.loan.tool.id, userId: { not: r.loan.userId } },
+    select: { userId: true },
+  });
+  for (const fav of favorites) {
+    await notifyUser(fav.userId, "FAVORITE_AVAILABLE", {
+      toolName: r.loan.tool.name,
+      toolId: r.loan.tool.id,
+    });
+  }
+
   await notifyUser(
     r.loan.userId,
     outcome === "OK" ? "LOAN_RETURNED_OK" : "LOAN_OVERDUE",

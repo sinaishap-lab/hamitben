@@ -1,13 +1,46 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { Search, X } from "lucide-react";
-import { useCallback, useState, useEffect } from "react";
+import {
+  Search,
+  X,
+  LayoutGrid,
+  Droplets,
+  Wheat,
+  Shovel,
+  SprayCan,
+  Sprout,
+  Package,
+  Truck,
+  Wrench,
+  MoreHorizontal,
+  type LucideIcon,
+} from "lucide-react";
+import { useCallback, useState, useEffect, type ReactNode } from "react";
 import type { ToolCategory } from "@prisma/client";
 import { TOOL_CATEGORY } from "@/lib/labels";
 import { Input } from "@/components/ui/Input";
 
 const CATEGORIES = Object.entries(TOOL_CATEGORY) as [ToolCategory, string][];
+
+// An icon per category — makes the filter quicker to scan.
+const CATEGORY_ICON: Record<ToolCategory, LucideIcon> = {
+  IRRIGATION: Droplets,
+  HARVESTING: Wheat,
+  SOIL_WORK: Shovel,
+  SPRAYING: SprayCan,
+  PLANTING: Sprout,
+  STORAGE: Package,
+  VEHICLES: Truck,
+  HAND_TOOLS: Wrench,
+  OTHER: MoreHorizontal,
+};
+
+const AVAIL_OPTIONS = [
+  { key: "", label: "הכל" },
+  { key: "today", label: "פנוי היום" },
+  { key: "tomorrow", label: "פנוי מחר" },
+] as const;
 
 function buildUrl(
   pathname: string,
@@ -34,7 +67,7 @@ export function ToolFilters({
   const [q, setQ] = useState(params.get("q") || "");
   const activeCategory = params.get("category") || "";
   const activeGemach = params.get("gemach") || "";
-  const availableOnly = params.get("available") === "1";
+  const activeAvail = params.get("avail") || "";
 
   // Debounce search input → URL update
   useEffect(() => {
@@ -55,10 +88,10 @@ export function ToolFilters({
     [pathname, params, router]
   );
 
-  const hasActive = q || activeCategory || activeGemach || availableOnly;
+  const hasActive = q || activeCategory || activeGemach || activeAvail;
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       {/* Search */}
       <div className="relative">
         <Search
@@ -74,33 +107,50 @@ export function ToolFilters({
         />
       </div>
 
-      {/* Category chips */}
-      <div className="-mx-4 px-4 overflow-x-auto scrollbar-thin">
-        <div className="flex gap-2 w-max">
+      {/* 1 — Category: wrapping chips, no horizontal scroll */}
+      <FilterSection label="לפי קטגוריה">
+        <div className="flex flex-wrap gap-2">
           <Chip
             active={!activeCategory}
             onClick={() => updateParam("category", null)}
+            icon={LayoutGrid}
           >
-            כל הקטגוריות
+            הכל
           </Chip>
           {CATEGORIES.map(([key, label]) => (
             <Chip
               key={key}
               active={activeCategory === key}
               onClick={() => updateParam("category", key)}
+              icon={CATEGORY_ICON[key]}
             >
               {label}
             </Chip>
           ))}
         </div>
-      </div>
+      </FilterSection>
 
-      {/* Gemach + availability row */}
-      <div className="flex gap-2">
+      {/* 2 — Availability (today / tomorrow) */}
+      <FilterSection label="לפי זמינות">
+        <div className="flex flex-wrap gap-2">
+          {AVAIL_OPTIONS.map((opt) => (
+            <Chip
+              key={opt.key}
+              active={activeAvail === opt.key}
+              onClick={() => updateParam("avail", opt.key || null)}
+            >
+              {opt.label}
+            </Chip>
+          ))}
+        </div>
+      </FilterSection>
+
+      {/* 3 — Gemach */}
+      <FilterSection label="לפי גמח">
         <select
           value={activeGemach}
           onChange={(e) => updateParam("gemach", e.target.value || null)}
-          className="flex-1 h-9 px-2 rounded-lg border border-primary-100 bg-bg-surface text-sm"
+          className="w-full h-10 px-2 rounded-lg border border-primary-100 bg-bg-surface text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
         >
           <option value="">כל הגמחים</option>
           {gemachs.map((g) => (
@@ -109,24 +159,15 @@ export function ToolFilters({
             </option>
           ))}
         </select>
-
-        <label className="flex items-center gap-2 text-sm bg-bg-surface border border-primary-100 rounded-lg px-3 h-9">
-          <input
-            type="checkbox"
-            checked={availableOnly}
-            onChange={(e) =>
-              updateParam("available", e.target.checked ? "1" : null)
-            }
-            className="w-4 h-4 accent-primary"
-          />
-          פנויים בלבד
-        </label>
-      </div>
+      </FilterSection>
 
       {hasActive && (
         <button
           type="button"
-          onClick={() => router.replace(pathname, { scroll: false })}
+          onClick={() => {
+            setQ("");
+            router.replace(pathname, { scroll: false });
+          }}
           className="self-end text-xs text-primary flex items-center gap-1"
         >
           <X className="w-3 h-3" />
@@ -137,25 +178,43 @@ export function ToolFilters({
   );
 }
 
+function FilterSection({
+  label,
+  children,
+}: {
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className="text-xs font-medium text-text-muted">{label}</span>
+      {children}
+    </div>
+  );
+}
+
 function Chip({
   active,
   onClick,
+  icon: Icon,
   children,
 }: {
   active: boolean;
   onClick: () => void;
-  children: React.ReactNode;
+  icon?: LucideIcon;
+  children: ReactNode;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`shrink-0 px-3 h-8 rounded-full text-xs font-medium transition-colors ${
+      className={`inline-flex items-center gap-1.5 px-3.5 h-9 rounded-full text-[13px] font-medium transition-colors ${
         active
-          ? "bg-primary text-text-inverse"
-          : "bg-bg-surface text-text border border-primary-100"
+          ? "bg-primary text-text-inverse border border-primary"
+          : "bg-bg-surface text-text border border-primary-100 hover:border-primary-300"
       }`}
     >
+      {Icon && <Icon className="w-3.5 h-3.5 shrink-0" aria-hidden />}
       {children}
     </button>
   );

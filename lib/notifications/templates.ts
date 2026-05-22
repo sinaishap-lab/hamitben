@@ -190,6 +190,24 @@ export function renderMessage(
       };
     }
 
+    case "FAVORITE_AVAILABLE": {
+      const tool = fallback(data, "toolName", "כלי ששמרת");
+      const toolId = fallback(data, "toolId");
+      return {
+        whatsapp: `${BRAND}\n❤️ *כלי מהמועדפים פנוי שוב*\n\n${tool} זמין עכשיו להשאלה.\n${APP_URL}/catalog/${toolId}`,
+        sms: `${BRAND_PLAIN}: ${tool} (מהמועדפים) פנוי עכשיו.`,
+        email: {
+          subject: `${tool} פנוי שוב`,
+          body: `כלי ששמרת במועדפים פנוי שוב להשאלה:\n\n${tool}\n\n${APP_URL}/catalog/${toolId}`,
+        },
+        push: {
+          title: "כלי מהמועדפים פנוי",
+          body: tool,
+          url: `/catalog/${toolId}`,
+        },
+      };
+    }
+
     case "TOOL_REQUEST_CREATED": {
       const desc = fallback(data, "description", "(תיאור)");
       const user = fallback(data, "userName");

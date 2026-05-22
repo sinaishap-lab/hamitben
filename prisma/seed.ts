@@ -24,7 +24,7 @@ const GEMACHS: GemachSeed[] = [
     lat: 31.63,
     lng: 35.12,
     managerName: "מנהל מזרח הגוש",
-    managerPhone: "050-0000001",
+    managerPhone: "0500000001",
     managerEmail: "mizrach@hamitben.co.il",
   },
   {
@@ -34,7 +34,7 @@ const GEMACHS: GemachSeed[] = [
     lat: 31.51,
     lng: 34.97,
     managerName: "מנהל תלם",
-    managerPhone: "050-0000002",
+    managerPhone: "0500000002",
     managerEmail: "telem@hamitben.co.il",
   },
   {
@@ -44,7 +44,7 @@ const GEMACHS: GemachSeed[] = [
     lat: 31.44,
     lng: 35.05,
     managerName: "מנהל דרום הר חברון",
-    managerPhone: "050-0000003",
+    managerPhone: "0500000003",
     managerEmail: "darom@hamitben.co.il",
   },
 ];
@@ -53,7 +53,7 @@ async function main() {
   console.log("🌾 Seeding HaMatben...");
 
   // Root admin (env-driven)
-  const adminPhone = process.env.ADMIN_PHONE || "050-0000000";
+  const adminPhone = process.env.ADMIN_PHONE || "0500000000";
   const adminEmail = process.env.ADMIN_EMAIL || "admin@hamitben.co.il";
   const adminPassword = process.env.ADMIN_PASSWORD || "ChangeMe!2026";
 

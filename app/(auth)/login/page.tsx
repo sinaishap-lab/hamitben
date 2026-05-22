@@ -57,7 +57,10 @@ function LoginForm() {
       return;
     }
 
-    router.push(callbackUrl);
+    // Default sign-in → personal welcome screen. If the user was sent to
+    // login from a specific page, honour that instead (skip the greeting).
+    const dest = callbackUrl && callbackUrl !== "/" ? callbackUrl : "/welcome";
+    router.push(dest);
     router.refresh();
   }
 

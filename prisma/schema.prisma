@@ -47,6 +47,7 @@ model User {
   pushTokens    PushToken[]
   waitlist      Waitlist[]
   toolRequests  ToolRequest[]
+  favorites     Favorite[]
 }
 
 enum UserRole {
@@ -112,11 +113,12 @@ model Tool {
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 
-  gemachId String
-  gemach   Gemach     @relation(fields: [gemachId], references: [id])
-  loans    Loan[]
-  reviews  Review[]
-  waitlist Waitlist[]
+  gemachId  String
+  gemach    Gemach     @relation(fields: [gemachId], references: [id])
+  loans     Loan[]
+  reviews   Review[]
+  waitlist  Waitlist[]
+  favorites Favorite[]
 }
 
 enum ToolCategory {
@@ -200,6 +202,10 @@ model Review {
   tool     Tool?   @relation(fields: [toolId], references: [id])
   gemachId String?
   gemach   Gemach? @relation(fields: [gemachId], references: [id])
+
+  // One review per user per tool (NULL toolId rows — gemach reviews — are
+  // exempt: Postgres allows multiple NULLs in a unique index).
+  @@unique([userId, toolId])
 }
 
 enum ReviewType {
@@ -218,6 +224,21 @@ model PushToken {
 
   userId String
   user   User   @relation(fields: [userId], references: [id])
+}
+
+// ───────────────────────────────
+// FAVORITES – saved tools (spec catalog wishlist)
+// ───────────────────────────────
+model Favorite {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+  toolId String
+  tool   Tool   @relation(fields: [toolId], references: [id])
+
+  @@unique([userId, toolId])
 }
 
 // ───────────────────────────────

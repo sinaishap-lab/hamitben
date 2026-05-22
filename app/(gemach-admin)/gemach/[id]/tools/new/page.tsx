@@ -2,6 +2,7 @@ import { redirect, notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ToolForm } from "@/components/tools/ToolForm";
+import { isCloudinaryConfigured } from "@/lib/cloudinary";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +44,7 @@ export default async function NewToolPage({
           maxDays: 7,
         }}
         redirectAfter={`/gemach/${gemach.id}/tools`}
+        cloudinaryConfigured={isCloudinaryConfigured()}
       />
     </div>
   );

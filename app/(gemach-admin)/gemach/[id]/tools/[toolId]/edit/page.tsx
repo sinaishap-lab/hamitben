@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ToolForm } from "@/components/tools/ToolForm";
 import { DeleteToolButton } from "./DeleteToolButton";
+import { isCloudinaryConfigured } from "@/lib/cloudinary";
 
 export const dynamic = "force-dynamic";
 
@@ -56,6 +57,7 @@ export default async function EditToolPage({
           maxDays: tool.maxDays,
         }}
         redirectAfter={`/gemach/${tool.gemach.id}/tools`}
+        cloudinaryConfigured={isCloudinaryConfigured()}
       />
 
       <section className="bg-bg-surface rounded-2xl border border-red-100 p-4 mt-4">

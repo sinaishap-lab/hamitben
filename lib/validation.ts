@@ -202,3 +202,13 @@ export const contactSchema = z.object({
   message: z.string().trim().min(5, "הודעה קצרה מדי").max(2000),
 });
 export type ContactInput = z.infer<typeof contactSchema>;
+
+export const reviewCreateSchema = z.object({
+  toolId: z.string().min(1, "כלי חסר"),
+  rating: z
+    .union([z.number(), z.string()])
+    .transform((v) => (typeof v === "string" ? parseInt(v, 10) : v))
+    .pipe(z.number().int().min(1, "יש לבחור דירוג").max(5)),
+  comment: z.string().trim().max(500).optional().nullable(),
+});
+export type ReviewCreateInput = z.infer<typeof reviewCreateSchema>;

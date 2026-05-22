@@ -22,9 +22,6 @@ export default async function AdminEditGemachPage({
       description: true,
       address: true,
       phone: true,
-      lat: true,
-      lng: true,
-      imageUrl: true,
       manager: { select: { name: true, phone: true } },
     },
   });
@@ -46,9 +43,6 @@ export default async function AdminEditGemachPage({
           description: gemach.description,
           address: gemach.address,
           phone: gemach.phone,
-          lat: gemach.lat,
-          lng: gemach.lng,
-          imageUrl: gemach.imageUrl,
         }}
         redirectAfter="/admin/gemachs"
       />

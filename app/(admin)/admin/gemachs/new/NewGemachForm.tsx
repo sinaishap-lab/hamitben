@@ -8,7 +8,7 @@ import { FormField } from "@/components/ui/FormField";
 import { Alert } from "@/components/ui/Alert";
 
 type FieldErrors = Partial<
-  Record<"name" | "address" | "phone" | "managerPhone" | "lat" | "lng" | "description", string[]>
+  Record<"name" | "address" | "phone" | "managerPhone" | "description", string[]>
 >;
 
 export function NewGemachForm() {
@@ -29,8 +29,6 @@ export function NewGemachForm() {
       description: form.get("description") || null,
       address: form.get("address"),
       phone: form.get("phone") || null,
-      lat: form.get("lat") || null,
-      lng: form.get("lng") || null,
       managerPhone: form.get("managerPhone"),
     };
 
@@ -88,22 +86,13 @@ export function NewGemachForm() {
       </FormField>
 
       <FormField
-        label="טלפון יצירת קשר"
+        label="טלפון ליצירת קשר"
         htmlFor="phone"
         hint="פורמט: 05XXXXXXXX"
         error={errors.phone?.[0]}
       >
         <Input id="phone" name="phone" type="tel" dir="ltr" invalid={!!errors.phone} />
       </FormField>
-
-      <div className="grid grid-cols-2 gap-3">
-        <FormField label="קו רוחב (lat)" htmlFor="lat" error={errors.lat?.[0]}>
-          <Input id="lat" name="lat" type="number" step="0.0001" dir="ltr" />
-        </FormField>
-        <FormField label="קו אורך (lng)" htmlFor="lng" error={errors.lng?.[0]}>
-          <Input id="lng" name="lng" type="number" step="0.0001" dir="ltr" />
-        </FormField>
-      </div>
 
       <FormField
         label="טלפון המנהל"

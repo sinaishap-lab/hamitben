@@ -8,6 +8,7 @@ import { ReferralCard } from "./ReferralCard";
 import { DeleteAccountButton } from "./DeleteAccountButton";
 import { BannedAlert } from "./BannedAlert";
 import { EnablePushButton } from "@/components/pwa/EnablePushButton";
+import { LogoutButton } from "@/components/auth/LogoutButton";
 
 export const dynamic = "force-dynamic";
 
@@ -60,12 +61,23 @@ export default async function ProfilePage() {
         <Link href="/my-loans" className="text-primary text-sm underline">
           ההשאלות שלי
         </Link>
+        <Link href="/favorites" className="text-primary text-sm underline">
+          המועדפים שלי
+        </Link>
         <Link href="/invite" className="text-primary text-sm underline">
           הזמן חבר וקבל הנחה
         </Link>
         <Link href="/terms" className="text-primary text-sm underline">
           תנאי השימוש
         </Link>
+      </section>
+
+      <section className="bg-bg-surface rounded-2xl border border-primary-100 p-4 flex flex-col gap-2">
+        <h2 className="font-bold">חשבון</h2>
+        <p className="text-xs text-text-muted">
+          מחובר כ-{user.name} ({user.phone}). להתחברות עם משתמש אחר — התנתק.
+        </p>
+        <LogoutButton />
       </section>
 
       <section className="bg-bg-surface rounded-2xl border border-red-100 p-4">

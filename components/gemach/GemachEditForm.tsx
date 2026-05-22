@@ -12,13 +12,10 @@ type Initial = {
   description: string | null;
   address: string;
   phone: string | null;
-  lat: number | null;
-  lng: number | null;
-  imageUrl: string | null;
 };
 
 type FieldErrors = Partial<
-  Record<"name" | "address" | "phone" | "description" | "lat" | "lng" | "imageUrl", string[]>
+  Record<"name" | "address" | "phone" | "description", string[]>
 >;
 
 export function GemachEditForm({
@@ -111,7 +108,7 @@ export function GemachEditForm({
       </FormField>
 
       <FormField
-        label="טלפון יצירת קשר"
+        label="טלפון ליצירת קשר"
         htmlFor="phone"
         hint="פורמט: 05XXXXXXXX"
         error={errors.phone?.[0]}
@@ -125,33 +122,6 @@ export function GemachEditForm({
           invalid={!!errors.phone}
         />
       </FormField>
-
-      <div className="grid grid-cols-2 gap-3">
-        <FormField label="קו רוחב (lat)" htmlFor="lat" error={errors.lat?.[0]}>
-          <Input
-            id="lat"
-            type="number"
-            step="0.0001"
-            dir="ltr"
-            value={values.lat ?? ""}
-            onChange={(e) =>
-              setField("lat", e.target.value === "" ? null : parseFloat(e.target.value))
-            }
-          />
-        </FormField>
-        <FormField label="קו אורך (lng)" htmlFor="lng" error={errors.lng?.[0]}>
-          <Input
-            id="lng"
-            type="number"
-            step="0.0001"
-            dir="ltr"
-            value={values.lng ?? ""}
-            onChange={(e) =>
-              setField("lng", e.target.value === "" ? null : parseFloat(e.target.value))
-            }
-          />
-        </FormField>
-      </div>
 
       <Button type="submit" loading={loading} size="lg">
         שמור

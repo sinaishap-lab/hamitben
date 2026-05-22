@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Sprout } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const SWIPE_THRESHOLD = 40; // px
 
 export function ToolGallery({
   images,
@@ -13,6 +15,7 @@ export function ToolGallery({
   name: string;
 }) {
   const [index, setIndex] = useState(0);
+  const touchStartX = useRef<number | null>(null);
 
   if (images.length === 0) {
     return (
@@ -26,17 +29,34 @@ export function ToolGallery({
     setIndex((i) => (i + delta + images.length) % images.length);
   }
 
+  function onTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.changedTouches[0]?.clientX ?? null;
+  }
+  function onTouchEnd(e: React.TouchEvent) {
+    if (touchStartX.current === null) return;
+    const dx = (e.changedTouches[0]?.clientX ?? 0) - touchStartX.current;
+    touchStartX.current = null;
+    if (Math.abs(dx) < SWIPE_THRESHOLD) return;
+    // RTL: swipe right → previous, swipe left → next
+    go(dx > 0 ? -1 : 1);
+  }
+
   return (
     <div className="flex flex-col gap-2">
-      <div className="relative aspect-[4/3] bg-bg-surface rounded-2xl overflow-hidden border border-primary-100">
+      <div
+        className="relative aspect-[4/3] bg-bg-surface rounded-2xl overflow-hidden border border-primary-100"
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
+      >
         <Image
           src={images[index]}
           alt={`${name} – תמונה ${index + 1}`}
           fill
           sizes="(max-width: 480px) 100vw, 480px"
-          className="object-cover"
+          className="object-cover select-none"
           priority={index === 0}
           unoptimized
+          draggable={false}
         />
         {images.length > 1 && (
           <>

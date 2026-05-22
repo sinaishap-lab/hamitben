@@ -2,17 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Sprout, ClipboardList, MessageCircle, User } from "lucide-react";
+import { Sprout, ClipboardList, Heart, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Spec §10 – ניווט תחתון (Bottom Nav)
-// Order in RTL (right → left): קטלוג | השאלותיי | ראשי | צור קשר | פרופיל
+// Bottom nav = the app's real sections only.
+// The landing page (/) is guest-only and the profile lives behind the
+// TopBar avatar — neither belongs here.
 const ITEMS = [
   { href: "/catalog", label: "קטלוג", icon: Sprout },
   { href: "/my-loans", label: "ההשאלות שלי", icon: ClipboardList },
-  { href: "/", label: "ראשי", icon: Home },
+  { href: "/about", label: "אודות", icon: Heart },
   { href: "/contact", label: "צור קשר", icon: MessageCircle },
-  { href: "/profile", label: "פרופיל", icon: User },
 ] as const;
 
 export function BottomNav() {
@@ -24,10 +24,9 @@ export function BottomNav() {
       className="fixed bottom-0 inset-x-0 z-40 bg-bg-surface border-t border-primary-100 mx-auto max-w-screen-sm"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <ul className="grid grid-cols-5 h-16">
+      <ul className="grid grid-cols-4 h-16">
         {ITEMS.map(({ href, label, icon: Icon }) => {
-          const isActive =
-            href === "/" ? pathname === "/" : pathname.startsWith(href);
+          const isActive = pathname.startsWith(href);
           return (
             <li key={href}>
               <Link

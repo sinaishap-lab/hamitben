@@ -1,19 +1,29 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { MapPin, Phone, Calendar, Wallet, Clock } from "lucide-react";
+import { MapPin, Phone, Calendar, Wallet, Clock, CalendarClock } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
 import { TOOL_CATEGORY, TOOL_STATUS } from "@/lib/labels";
-import { formatShekel } from "@/lib/utils";
+import { formatShekel, formatDateHe } from "@/lib/utils";
+import { computeNextFree } from "@/lib/availability";
 import { ToolGallery } from "./ToolGallery";
 import { ShareToolButton } from "./ShareToolButton";
 import { WaitlistButton } from "./WaitlistButton";
 import { ToolCalendar } from "./ToolCalendar";
+import { InlineLoanForm } from "./InlineLoanForm";
+import { GuestAvailability } from "./GuestAvailability";
+import { ReviewSection } from "./ReviewSection";
+import { FavoriteButton } from "@/components/tools/FavoriteButton";
 
 export const dynamic = "force-dynamic";
+
+function startOfDay(d: Date): Date {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  return x;
+}
 
 export default async function ToolPage({
   params,
@@ -42,8 +52,18 @@ export default async function ToolPage({
 
   const session = await auth();
   const userId = session?.user?.id;
+  const today = startOfDay(new Date());
 
-  const [waitlistRow, totalAhead] = await Promise.all([
+  const [
+    waitlistRow,
+    totalAhead,
+    currentUser,
+    favoriteRow,
+    reviews,
+    completedLoan,
+    existingReview,
+    busyLoans,
+  ] = await Promise.all([
     userId
       ? prisma.waitlist.findUnique({
           where: { toolId_userId: { toolId: tool.id, userId } },
@@ -51,14 +71,63 @@ export default async function ToolPage({
         })
       : Promise.resolve(null),
     prisma.waitlist.count({ where: { toolId: tool.id } }),
+    userId
+      ? prisma.user.findUnique({
+          where: { id: userId },
+          select: { discountTokens: true },
+        })
+      : Promise.resolve(null),
+    userId
+      ? prisma.favorite.findUnique({
+          where: { userId_toolId: { userId, toolId: tool.id } },
+          select: { id: true },
+        })
+      : Promise.resolve(null),
+    prisma.review.findMany({
+      where: { toolId: tool.id, type: "TOOL" },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        rating: true,
+        comment: true,
+        createdAt: true,
+        user: { select: { name: true } },
+      },
+    }),
+    userId
+      ? prisma.loan.findFirst({
+          where: {
+            toolId: tool.id,
+            userId,
+            status: { in: ["RETURNED", "OVERDUE"] },
+          },
+          select: { id: true },
+        })
+      : Promise.resolve(null),
+    userId
+      ? prisma.review.findFirst({
+          where: { toolId: tool.id, userId, type: "TOOL" },
+          select: { id: true },
+        })
+      : Promise.resolve(null),
+    prisma.loan.findMany({
+      where: {
+        toolId: tool.id,
+        status: { in: ["APPROVED", "ACTIVE"] },
+        endDate: { gte: today },
+      },
+      select: { startDate: true, endDate: true },
+    }),
   ]);
 
   const available = tool.status === "AVAILABLE";
-  const role = session?.user?.role;
   const status = session?.user?.status;
   const banned = session?.user?.isBanned === true;
   const canRequestLoan =
     !!session?.user && status === "APPROVED" && !banned && available;
+
+  const nextFree = computeNextFree(busyLoans, today);
+  const isBusy = nextFree.getTime() > today.getTime();
 
   return (
     <article className="px-4 py-4 flex flex-col gap-5">
@@ -82,11 +151,33 @@ export default async function ToolPage({
         <Badge variant="primary" className="self-start">
           {TOOL_CATEGORY[tool.category]}
         </Badge>
+        {isBusy && (
+          <div className="flex items-center gap-1.5 text-sm text-warning font-medium">
+            <CalendarClock className="w-4 h-4" aria-hidden />
+            הכלי תפוס — מתפנה ב-{formatDateHe(nextFree)}
+          </div>
+        )}
       </header>
 
       {tool.description && (
         <p className="text-sm leading-relaxed text-text">{tool.description}</p>
       )}
+
+      {/* Save + share */}
+      <section className="flex gap-2">
+        {userId && (
+          <div className="flex-1">
+            <FavoriteButton toolId={tool.id} initialFavorite={!!favoriteRow} />
+          </div>
+        )}
+        <div className="flex-1">
+          <ShareToolButton
+            toolName={tool.name}
+            gemachName={tool.gemach.name}
+            dailyRate={tool.dailyRate}
+          />
+        </div>
+      </section>
 
       {/* Gemach */}
       <section className="bg-bg-surface rounded-2xl border border-primary-100 p-4 flex flex-col gap-1">
@@ -110,62 +201,72 @@ export default async function ToolPage({
       {/* Pricing */}
       <section className="bg-bg-surface rounded-2xl border border-primary-100 p-4 grid grid-cols-3 gap-2 text-center">
         <Stat icon={Wallet} label="פיקדון" value={formatShekel(tool.depositAmount)} />
-        <Stat icon={Calendar} label="תעריף יומי" value={tool.dailyRate > 0 ? formatShekel(tool.dailyRate) : "חינם"} />
+        <Stat
+          icon={Calendar}
+          label="תעריף יומי"
+          value={tool.dailyRate > 0 ? formatShekel(tool.dailyRate) : "חינם"}
+        />
         <Stat icon={Clock} label="עד" value={`${tool.maxDays} ימים`} />
       </section>
 
-      {/* Availability calendar */}
-      <section>
-        <h2 className="font-bold mb-2">זמינות</h2>
-        <ToolCalendar toolId={tool.id} maxDays={tool.maxDays} />
-      </section>
-
-      {/* Action area */}
-      <section className="flex flex-col gap-3">
-        {!session?.user ? (
-          <Alert variant="info">
-            יש להתחבר כדי לבקש השאלה.
-            <Link
-              href={`/login?callbackUrl=/catalog/${tool.id}`}
-              className="block mt-1 text-primary font-medium underline"
-            >
-              כניסה / הרשמה
-            </Link>
-          </Alert>
-        ) : status === "PENDING" ? (
-          <Alert variant="warning">
-            חשבונך ממתין לאישור מנהל. השאלה תתאפשר לאחר אישור.
-          </Alert>
-        ) : banned ? (
-          <Alert variant="error">
-            חשבונך חסום מהשאלות עתידיות.{" "}
-            <Link href="/contact" className="underline">
-              צור קשר
-            </Link>
-          </Alert>
-        ) : role === "GEMACH_MANAGER" || role === "ADMIN" ? null : null}
-
-        {canRequestLoan ? (
-          <Link href={`/loans/new?toolId=${tool.id}`}>
-            <Button size="lg" variant="primary">
-              בקש השאלה
-            </Button>
-          </Link>
-        ) : !available && session?.user && status === "APPROVED" && !banned ? (
-          <WaitlistButton
+      {/* Inline loan flow when eligible, otherwise gate messaging + calendar */}
+      {canRequestLoan ? (
+        <section>
+          <InlineLoanForm
             toolId={tool.id}
-            joined={!!waitlistRow}
-            position={waitlistRow?.position ?? null}
-            totalAhead={totalAhead}
+            maxDays={tool.maxDays}
+            dailyRate={tool.dailyRate}
+            depositAmount={tool.depositAmount}
+            discountTokens={currentUser?.discountTokens ?? 0}
           />
-        ) : null}
+        </section>
+      ) : !session?.user ? (
+        <section>
+          <GuestAvailability toolId={tool.id} maxDays={tool.maxDays} />
+        </section>
+      ) : (
+        <>
+          <section>
+            <h2 className="font-bold mb-2">זמינות</h2>
+            <ToolCalendar toolId={tool.id} maxDays={tool.maxDays} />
+          </section>
 
-        <ShareToolButton
-          toolName={tool.name}
-          gemachName={tool.gemach.name}
-          dailyRate={tool.dailyRate}
-        />
-      </section>
+          <section className="flex flex-col gap-3">
+            {status === "PENDING" ? (
+              <Alert variant="warning">
+                חשבונך ממתין לאישור מנהל. השאלה תתאפשר לאחר אישור.
+              </Alert>
+            ) : banned ? (
+              <Alert variant="error">
+                חשבונך חסום מהשאלות עתידיות.{" "}
+                <Link href="/contact" className="underline">
+                  צור קשר
+                </Link>
+              </Alert>
+            ) : null}
+
+            {!available && status === "APPROVED" && !banned && (
+              <WaitlistButton
+                toolId={tool.id}
+                joined={!!waitlistRow}
+                position={waitlistRow?.position ?? null}
+                totalAhead={totalAhead}
+              />
+            )}
+          </section>
+        </>
+      )}
+
+      {/* Reviews */}
+      <ReviewSection
+        toolId={tool.id}
+        initialReviews={reviews.map((r) => ({
+          ...r,
+          createdAt: r.createdAt.toISOString(),
+        }))}
+        canReview={!!completedLoan}
+        alreadyReviewed={!!existingReview}
+      />
     </article>
   );
 }

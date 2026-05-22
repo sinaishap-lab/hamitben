@@ -1,8 +1,19 @@
 import Link from "next/link";
-import { Wheat, ArrowLeft } from "lucide-react";
+import { redirect } from "next/navigation";
+import { Wheat } from "lucide-react";
+import { auth } from "@/lib/auth";
+import { GuestEntryButton } from "@/components/auth/GuestEntryButton";
 
-// Spec §8.1 – דף ברוכים הבאים
-export default function HomePage() {
+export const dynamic = "force-dynamic";
+
+// Spec §8.1 – דף ברוכים הבאים. Guest-only: a logged-in user has no reason to
+// see the landing page, so we bounce them to where they actually work.
+export default async function HomePage() {
+  const session = await auth();
+  if (session?.user) {
+    redirect(session.user.role === "ADMIN" ? "/admin" : "/catalog");
+  }
+
   return (
     <div className="px-4 py-8 flex flex-col gap-10">
       {/* Hero */}
@@ -30,13 +41,7 @@ export default function HomePage() {
         >
           הרשמה
         </Link>
-        <Link
-          href="/catalog"
-          className="w-full h-12 rounded-xl text-text-muted font-medium flex items-center justify-center gap-2"
-        >
-          כניסה כאורח
-          <ArrowLeft className="w-4 h-4" aria-hidden />
-        </Link>
+        <GuestEntryButton />
       </section>
 
       {/* Highlights – per spec §18 about page intent */}

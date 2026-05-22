@@ -30,11 +30,13 @@ export function ToolForm({
   toolId,
   initial,
   redirectAfter,
+  cloudinaryConfigured,
 }: {
   gemachId: string;
   toolId?: string;
   initial: Values;
   redirectAfter: string;
+  cloudinaryConfigured: boolean;
 }) {
   const router = useRouter();
   const [values, setValues] = useState<Values>(initial);
@@ -124,6 +126,7 @@ export function ToolForm({
           value={values.images}
           onChange={(arr) => setField("images", arr)}
           folder={`hamitben/tools/${gemachId}`}
+          cloudinaryConfigured={cloudinaryConfigured}
         />
       </FormField>
 

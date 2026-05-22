@@ -21,9 +21,6 @@ export default async function GemachSettingsPage({
       description: true,
       address: true,
       phone: true,
-      lat: true,
-      lng: true,
-      imageUrl: true,
       managerId: true,
     },
   });
@@ -47,9 +44,6 @@ export default async function GemachSettingsPage({
           description: gemach.description,
           address: gemach.address,
           phone: gemach.phone,
-          lat: gemach.lat,
-          lng: gemach.lng,
-          imageUrl: gemach.imageUrl,
         }}
         redirectAfter={`/gemach/${gemach.id}/dashboard`}
       />

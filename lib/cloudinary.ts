@@ -25,28 +25,23 @@ export function getCloudName() {
   return CLOUD_NAME;
 }
 
-/** Create a short-lived signature for a client-side upload. */
-export function signUpload(folder: string): {
-  signature: string;
-  timestamp: number;
-  apiKey: string;
-  cloudName: string;
-  folder: string;
-} {
+/**
+ * Upload an image to Cloudinary from the server.
+ *
+ * `source` may be a data-URI (`data:image/...;base64,...`) or a remote URL.
+ * The SDK handles signing internally — no manual signature dance.
+ */
+export async function uploadImage(
+  source: string,
+  folder: string
+): Promise<{ url: string }> {
   if (!isCloudinaryConfigured()) {
     throw new Error("Cloudinary not configured");
   }
   configure();
-  const timestamp = Math.floor(Date.now() / 1000);
-  const signature = cloudinary.utils.api_sign_request(
-    { timestamp, folder },
-    API_SECRET!
-  );
-  return {
-    signature,
-    timestamp,
-    apiKey: API_KEY!,
-    cloudName: CLOUD_NAME!,
+  const result = await cloudinary.uploader.upload(source, {
     folder,
-  };
+    resource_type: "image",
+  });
+  return { url: result.secure_url };
 }
