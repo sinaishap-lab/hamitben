@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/Badge";
-import { TOOL_CATEGORY } from "@/lib/labels";
 import { formatDateHe } from "@/lib/utils";
 import { ToolRequestActions } from "./ToolRequestActions";
 
@@ -30,7 +29,7 @@ export default async function AdminToolRequestsPage() {
     select: {
       id: true,
       description: true,
-      category: true,
+      category: { select: { name: true } },
       status: true,
       createdAt: true,
       user: { select: { name: true, phone: true } },
@@ -42,7 +41,8 @@ export default async function AdminToolRequestsPage() {
   const categoryCounts = new Map<string, number>();
   for (const r of requests) {
     if (r.status === "PENDING" && r.category) {
-      categoryCounts.set(r.category, (categoryCounts.get(r.category) ?? 0) + 1);
+      const name = r.category.name;
+      categoryCounts.set(name, (categoryCounts.get(name) ?? 0) + 1);
     }
   }
   const hotCategories = Array.from(categoryCounts.entries()).filter(
@@ -67,7 +67,7 @@ export default async function AdminToolRequestsPage() {
                 key={cat}
                 className="bg-bg-surface rounded-full px-2 py-0.5 text-xs"
               >
-                {TOOL_CATEGORY[cat as keyof typeof TOOL_CATEGORY]} · {c} בקשות
+                {cat} · {c} בקשות
               </li>
             ))}
           </ul>
@@ -94,7 +94,7 @@ export default async function AdminToolRequestsPage() {
                 {r.category && (
                   <>
                     {" · "}
-                    {TOOL_CATEGORY[r.category]}
+                    {r.category.name}
                   </>
                 )}
                 {r.gemach && <> · יעד: {r.gemach.name}</>}

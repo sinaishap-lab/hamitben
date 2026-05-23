@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { Prisma, type ToolCategory } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { toolCreateSchema } from "@/lib/validation";
@@ -14,7 +14,7 @@ export async function GET(req: Request) {
 
   const where: Prisma.ToolWhereInput = {
     isActive: true,
-    ...(category ? { category: category as ToolCategory } : {}),
+    ...(category ? { categoryId: category } : {}),
     ...(gemachId ? { gemachId } : {}),
     ...(available ? { status: "AVAILABLE" } : {}),
     ...(q
@@ -33,7 +33,7 @@ export async function GET(req: Request) {
     select: {
       id: true,
       name: true,
-      category: true,
+      category: { select: { id: true, name: true } },
       images: true,
       status: true,
       depositAmount: true,

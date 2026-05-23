@@ -5,7 +5,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/Badge";
 import { Alert } from "@/components/ui/Alert";
-import { TOOL_CATEGORY, TOOL_STATUS } from "@/lib/labels";
+import { TOOL_STATUS } from "@/lib/labels";
 import { formatShekel, formatDateHe } from "@/lib/utils";
 import { computeNextFree } from "@/lib/availability";
 import { ToolGallery } from "./ToolGallery";
@@ -36,7 +36,7 @@ export default async function ToolPage({
       id: true,
       name: true,
       description: true,
-      category: true,
+      category: { select: { name: true } },
       images: true,
       status: true,
       autoApprove: true,
@@ -149,7 +149,7 @@ export default async function ToolPage({
           </Badge>
         </div>
         <Badge variant="primary" className="self-start">
-          {TOOL_CATEGORY[tool.category]}
+          {tool.category.name}
         </Badge>
         {isBusy && (
           <div className="flex items-center gap-1.5 text-sm text-warning font-medium">

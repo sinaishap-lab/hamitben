@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Wheat } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { GuestEntryButton } from "@/components/auth/GuestEntryButton";
 
@@ -15,55 +14,53 @@ export default async function HomePage() {
   }
 
   return (
-    <div className="px-4 py-8 flex flex-col gap-10">
-      {/* Hero */}
-      <section className="text-center pt-6">
-        <div className="mx-auto w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-          <Wheat className="w-10 h-10 text-primary" aria-hidden />
+    <div className="px-4 py-8 flex flex-col gap-8">
+      {/* Hero — logo + name + tagline */}
+      <section className="text-center pt-2 flex flex-col items-center">
+        <div className="w-24 h-24 mb-4">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo.png"
+            alt=""
+            className="w-full h-full rounded-2xl shadow-soft object-contain"
+            aria-hidden
+          />
         </div>
-        <h1 className="text-3xl font-bold text-primary">המתבן</h1>
-        <p className="mt-2 text-text-muted text-balance">
-          גמח כלי עבודה חקלאיים – יחד עושים יותר מכל אחד לבד
+        <h1 className="text-4xl font-bold text-primary tracking-tight">
+          המתבן
+        </h1>
+        <div className="mt-2 h-0.5 w-12 rounded-full bg-gradient-accent" />
+        <p className="mt-3 text-text-muted text-balance text-base max-w-xs">
+          גמח כלי עבודה חברתי חקלאי ציוני
         </p>
+      </section>
+
+      {/* Hero illustration */}
+      <section>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/landingillustration.png"
+          alt=""
+          className="w-full h-auto rounded-2xl shadow-card border border-primary-100/60"
+          aria-hidden
+        />
       </section>
 
       {/* CTAs */}
       <section className="flex flex-col gap-3">
         <Link
           href="/login"
-          className="w-full h-12 rounded-xl bg-primary text-text-inverse font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+          className="w-full h-12 rounded-xl bg-gradient-primary text-text-inverse font-medium flex items-center justify-center gap-2 shadow-soft hover:shadow-glow hover:brightness-110 active:brightness-90 active:scale-[0.98] transition-all"
         >
           כניסה
         </Link>
         <Link
           href="/register"
-          className="w-full h-12 rounded-xl border-2 border-primary text-primary font-medium flex items-center justify-center"
+          className="w-full h-12 rounded-xl border-2 border-primary text-primary font-medium flex items-center justify-center bg-bg-surface hover:bg-primary-50 transition-colors"
         >
           הרשמה
         </Link>
         <GuestEntryButton />
-      </section>
-
-      {/* Highlights – per spec §18 about page intent */}
-      <section className="grid grid-cols-3 gap-3 text-center text-xs">
-        <div className="rounded-xl bg-bg-surface p-3 border border-primary-100">
-          <div className="text-2xl mb-1" aria-hidden>
-            💰
-          </div>
-          <div className="text-text-muted">חיסכון</div>
-        </div>
-        <div className="rounded-xl bg-bg-surface p-3 border border-primary-100">
-          <div className="text-2xl mb-1" aria-hidden>
-            🤝
-          </div>
-          <div className="text-text-muted">קהילה</div>
-        </div>
-        <div className="rounded-xl bg-bg-surface p-3 border border-primary-100">
-          <div className="text-2xl mb-1" aria-hidden>
-            🌱
-          </div>
-          <div className="text-text-muted">שמירת האדמה</div>
-        </div>
       </section>
 
       {/* Launch communities (spec §1) */}

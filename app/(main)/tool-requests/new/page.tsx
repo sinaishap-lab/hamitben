@@ -11,11 +11,17 @@ export default async function NewToolRequestPage() {
     redirect(`/login?callbackUrl=/tool-requests/new`);
   }
 
-  const gemachs = await prisma.gemach.findMany({
-    where: { isActive: true },
-    orderBy: { name: "asc" },
-    select: { id: true, name: true },
-  });
+  const [gemachs, categories] = await Promise.all([
+    prisma.gemach.findMany({
+      where: { isActive: true },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    }),
+    prisma.category.findMany({
+      orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+      select: { id: true, name: true },
+    }),
+  ]);
 
   return (
     <div className="px-4 py-6 flex flex-col gap-4">
@@ -25,7 +31,7 @@ export default async function NewToolRequestPage() {
           לא מצאת בקטלוג? תאר את הכלי שאתה צריך, ונודיע לך כשיתווסף.
         </p>
       </header>
-      <NewToolRequestForm gemachs={gemachs} />
+      <NewToolRequestForm gemachs={gemachs} categories={categories} />
     </div>
   );
 }

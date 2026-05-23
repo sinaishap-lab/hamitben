@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     const request = await prisma.toolRequest.create({
       data: {
         description: parsed.data.description,
-        category: parsed.data.category || null,
+        categoryId: parsed.data.categoryId || null,
         gemachId: parsed.data.gemachId || null,
         userId: session.user.id,
       },

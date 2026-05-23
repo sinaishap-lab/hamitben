@@ -103,12 +103,15 @@
 - **סוויפ בין תמונות** בגלריה.
 - טפסי גמח — הוסרו lat/lng. `/admin/gemachs` — סטטיסטיקות (כלים/השאלות/הכנסות).
 
-### בעבודה / מתוכנן
-- **ניהול קטגוריות** — refactor של `ToolCategory` enum → טבלת `Category` + מסך `/admin/categories`.
-  מתוכנן (tasks בקובץ המשימות), טרם בוצע. דורש 2 שלבי `db push` + סקריפט backfill.
+### ניהול קטגוריות (הושלם)
+- `ToolCategory` enum הומר לטבלת `Category` (שם / אייקון / סדר תצוגה).
+- מסך `/admin/categories` (אדמין בלבד, תחת "ניהול") ל-CRUD מלא + API `/api/categories`.
+- אייקונים דרך `lib/category-icons.ts`. קטגוריות נזרעות ב-`prisma/seed.ts`
+  דרך `prisma/category-seed.ts`. מחיקת קטגוריה חסומה כשמשויכים אליה כלים.
 
 ### שינויי סכמה שכבר בוצעו (מעבר לאפיון המקורי)
 - `Loan.referralDiscountApplied` · `Favorite` model · `Review @@unique([userId, toolId])`.
+- `Category` model · `Tool.categoryId` (חובה) · `ToolRequest.categoryId` — החליפו את enum `ToolCategory`.
 
 ### בעיות ידועות (מ-code review)
 - Race condition בבדיקת חפיפת תאריכים ב-`POST /api/loans` (אין lock).
@@ -117,6 +120,7 @@
 - Cardcom webhook — אימות חתימה עדיין `TODO`.
 
 ### Git
-שני commits: `fc658ae` (שלבים 1-2), `2d9c608` (שלבים 3-11). **כל עבודת ה-UX וה-favorites/reviews/קטלוג של הסשנים האחרונים — עדיין לא מקומיט.**
+commits: `fc658ae` (שלבים 1-2), `2d9c608` (שלבים 3-11), `9dae884` (UX/מועדפים/ביקורות/קטלוג).
+**עבודת ניהול הקטגוריות — עדיין לא מקומיט.**
 
 לפני הפעלת production, ראה [`docs/DEPLOY.md`](docs/DEPLOY.md).

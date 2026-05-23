@@ -173,9 +173,22 @@ export default function RegisterPage() {
         </p>
       </header>
 
-      <Suspense fallback={<div className="text-text-muted">טוען...</div>}>
-        <RegisterForm />
-      </Suspense>
+      {/* Form wrapped in a relative container; illustration sits behind it
+          as a semi-transparent watermark, the fields stay legible on top. */}
+      <div className="relative">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/harshamapage.png"
+          alt=""
+          aria-hidden
+          className="pointer-events-none absolute inset-0 w-full h-full object-contain opacity-20"
+        />
+        <div className="relative z-10">
+          <Suspense fallback={<div className="text-text-muted">טוען...</div>}>
+            <RegisterForm />
+          </Suspense>
+        </div>
+      </div>
 
       <p className="text-center text-sm text-text-muted">
         כבר רשום?{" "}

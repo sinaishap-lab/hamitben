@@ -2,18 +2,16 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import type { ToolCategory } from "@prisma/client";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { FormField } from "@/components/ui/FormField";
 import { Alert } from "@/components/ui/Alert";
-import { TOOL_CATEGORY } from "@/lib/labels";
 import { ImageUploader } from "@/components/tools/ImageUploader";
 
 type Values = {
   name: string;
   description: string;
-  category: ToolCategory;
+  categoryId: string;
   images: string[];
   autoApprove: boolean;
   depositAmount: number;
@@ -23,18 +21,18 @@ type Values = {
 
 type FieldErrors = Partial<Record<keyof Values, string[]>>;
 
-const CATEGORIES = Object.keys(TOOL_CATEGORY) as ToolCategory[];
-
 export function ToolForm({
   gemachId,
   toolId,
   initial,
+  categories,
   redirectAfter,
   cloudinaryConfigured,
 }: {
   gemachId: string;
   toolId?: string;
   initial: Values;
+  categories: { id: string; name: string }[];
   redirectAfter: string;
   cloudinaryConfigured: boolean;
 }) {
@@ -106,16 +104,24 @@ export function ToolForm({
         />
       </FormField>
 
-      <FormField label="קטגוריה" htmlFor="category" required error={errors.category?.[0]}>
+      <FormField
+        label="קטגוריה"
+        htmlFor="categoryId"
+        required
+        error={errors.categoryId?.[0]}
+      >
         <select
-          id="category"
-          value={values.category}
-          onChange={(e) => setField("category", e.target.value as ToolCategory)}
+          id="categoryId"
+          value={values.categoryId}
+          onChange={(e) => setField("categoryId", e.target.value)}
           className="w-full h-11 px-3 rounded-xl border border-primary-100 bg-bg-surface focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
         >
-          {CATEGORIES.map((c) => (
-            <option key={c} value={c}>
-              {TOOL_CATEGORY[c]}
+          <option value="" disabled>
+            — בחר קטגוריה —
+          </option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
             </option>
           ))}
         </select>

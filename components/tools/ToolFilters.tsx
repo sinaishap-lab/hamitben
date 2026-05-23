@@ -1,40 +1,10 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import {
-  Search,
-  X,
-  LayoutGrid,
-  Droplets,
-  Wheat,
-  Shovel,
-  SprayCan,
-  Sprout,
-  Package,
-  Truck,
-  Wrench,
-  MoreHorizontal,
-  type LucideIcon,
-} from "lucide-react";
+import { Search, X, LayoutGrid, type LucideIcon } from "lucide-react";
 import { useCallback, useState, useEffect, type ReactNode } from "react";
-import type { ToolCategory } from "@prisma/client";
-import { TOOL_CATEGORY } from "@/lib/labels";
+import { getCategoryIcon } from "@/lib/category-icons";
 import { Input } from "@/components/ui/Input";
-
-const CATEGORIES = Object.entries(TOOL_CATEGORY) as [ToolCategory, string][];
-
-// An icon per category — makes the filter quicker to scan.
-const CATEGORY_ICON: Record<ToolCategory, LucideIcon> = {
-  IRRIGATION: Droplets,
-  HARVESTING: Wheat,
-  SOIL_WORK: Shovel,
-  SPRAYING: SprayCan,
-  PLANTING: Sprout,
-  STORAGE: Package,
-  VEHICLES: Truck,
-  HAND_TOOLS: Wrench,
-  OTHER: MoreHorizontal,
-};
 
 const AVAIL_OPTIONS = [
   { key: "", label: "הכל" },
@@ -57,8 +27,10 @@ function buildUrl(
 
 export function ToolFilters({
   gemachs,
+  categories,
 }: {
   gemachs: { id: string; name: string }[];
+  categories: { id: string; name: string; icon: string }[];
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -117,14 +89,14 @@ export function ToolFilters({
           >
             הכל
           </Chip>
-          {CATEGORIES.map(([key, label]) => (
+          {categories.map((cat) => (
             <Chip
-              key={key}
-              active={activeCategory === key}
-              onClick={() => updateParam("category", key)}
-              icon={CATEGORY_ICON[key]}
+              key={cat.id}
+              active={activeCategory === cat.id}
+              onClick={() => updateParam("category", cat.id)}
+              icon={getCategoryIcon(cat.icon)}
             >
-              {label}
+              {cat.name}
             </Chip>
           ))}
         </div>
@@ -208,10 +180,10 @@ function Chip({
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex items-center gap-1.5 px-3.5 h-9 rounded-full text-[13px] font-medium transition-colors ${
+      className={`inline-flex items-center gap-1.5 px-3.5 h-9 rounded-full text-[13px] font-medium transition-all duration-200 ${
         active
-          ? "bg-primary text-text-inverse border border-primary"
-          : "bg-bg-surface text-text border border-primary-100 hover:border-primary-300"
+          ? "bg-gradient-primary text-text-inverse shadow-soft hover:shadow-glow border border-primary-700"
+          : "bg-bg-surface text-text border border-primary-100 hover:border-primary-300 hover:bg-primary-50/40"
       }`}
     >
       {Icon && <Icon className="w-3.5 h-3.5 shrink-0" aria-hidden />}

@@ -9,55 +9,61 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Spec §10 palette
+        // Brand palette — drawn from the "ציון" logo (lion + hourglass)
+        // Primary: deep teal — the lion + Hebrew lettering
         primary: {
-          DEFAULT: "#4A7C59", // ירוק כהה – צמחייה
-          50: "#EDF3EF",
-          100: "#D6E3DA",
-          200: "#AEC7B6",
-          300: "#86AB92",
-          400: "#5E8F6E",
-          500: "#4A7C59",
-          600: "#3B6347",
-          700: "#2C4A35",
-          800: "#1D3124",
-          900: "#0E1812",
+          DEFAULT: "#1F4A5C",
+          50: "#EAF1F4",
+          100: "#CDDDE3",
+          200: "#A0BCC8",
+          300: "#6E96A6",
+          400: "#467685",
+          500: "#2D5C6E",
+          600: "#1F4A5C",
+          700: "#163848",
+          800: "#0F2832",
+          900: "#091921",
         },
+        // Secondary: mid teal — the lion's mid stroke (softer)
         secondary: {
-          DEFAULT: "#8B5E3C", // חום – אדמה
-          50: "#F3ECE5",
-          100: "#E2D1BF",
-          200: "#C5A37E",
-          300: "#A87F58",
-          400: "#8B5E3C",
-          500: "#6F4B30",
-          600: "#533824",
-          700: "#382518",
-          800: "#1C130C",
+          DEFAULT: "#3D7A8B",
+          50: "#EDF4F6",
+          100: "#CFE0E5",
+          200: "#9DC0CB",
+          300: "#6BA0B0",
+          400: "#4E8898",
+          500: "#3D7A8B",
+          600: "#2F606F",
+          700: "#234852",
+          800: "#172F36",
         },
+        // Accent: warm gold — the hourglass / wheat
         accent: {
-          DEFAULT: "#D4A843", // זהב – שיבולים
-          50: "#FBF5E3",
-          100: "#F5E7B7",
-          200: "#EBD085",
-          300: "#E2BB5F",
-          400: "#D4A843",
-          500: "#B68B2E",
-          600: "#8A6822",
-          700: "#5D4617",
+          DEFAULT: "#B88528",
+          50: "#FBF6E8",
+          100: "#F5E8BD",
+          200: "#EBCE7E",
+          300: "#DEB446",
+          400: "#CFA033",
+          500: "#B88528",
+          600: "#946A20",
+          700: "#704F18",
+          800: "#4C3611",
+          900: "#2A1E09",
         },
         bg: {
-          DEFAULT: "#F7F3ED", // שמנת
+          DEFAULT: "#F8F6F1", // warm off-white — pairs with deep teal
           surface: "#FFFFFF",
+          muted: "#F1EDE5", // subtle section background
         },
         text: {
-          DEFAULT: "#2C2416", // חום כהה
-          muted: "#6B6354",
+          DEFAULT: "#1A2832", // cool ink — complements teal
+          muted: "#5C6B75",
           inverse: "#FFFFFF",
         },
-        success: "#3D8B37",
-        warning: "#E6992C",
-        error: "#C0392B",
+        success: "#2E7D5B",
+        warning: "#D97706",
+        error: "#B91C1C",
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
@@ -65,7 +71,21 @@ const config: Config = {
         sans: ['"Heebo"', "system-ui", "sans-serif"],
       },
       maxWidth: {
-        screen: "480px", // mobile-first content cap
+        screen: "480px",
+      },
+      boxShadow: {
+        soft: "0 2px 12px -2px rgb(31 74 92 / 0.10)",
+        glow: "0 6px 24px -6px rgb(31 74 92 / 0.25)",
+        "accent-glow": "0 6px 20px -4px rgb(184 133 40 / 0.40)",
+        card: "0 1px 3px 0 rgb(31 74 92 / 0.06), 0 1px 2px -1px rgb(31 74 92 / 0.04)",
+      },
+      backgroundImage: {
+        "gradient-primary":
+          "linear-gradient(135deg, #2D5C6E 0%, #1F4A5C 100%)",
+        "gradient-accent":
+          "linear-gradient(135deg, #CFA033 0%, #B88528 100%)",
+        "gradient-hero":
+          "linear-gradient(180deg, #F8F6F1 0%, #EAF1F4 100%)",
       },
     },
   },

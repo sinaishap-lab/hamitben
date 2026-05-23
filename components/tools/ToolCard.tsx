@@ -1,8 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { MapPin, Sprout, Flame, CalendarClock } from "lucide-react";
-import type { ToolCategory, ToolStatus } from "@prisma/client";
-import { TOOL_CATEGORY, TOOL_STATUS } from "@/lib/labels";
+import type { ToolStatus } from "@prisma/client";
+import { TOOL_STATUS } from "@/lib/labels";
 import { Badge } from "@/components/ui/Badge";
 import { ReviewStars } from "@/components/reviews/ReviewStars";
 import { FavoriteButton } from "@/components/tools/FavoriteButton";
@@ -12,7 +12,7 @@ type Props = {
   tool: {
     id: string;
     name: string;
-    category: ToolCategory;
+    category: { name: string };
     images: string[];
     status: ToolStatus;
     depositAmount: number;
@@ -42,19 +42,19 @@ export function ToolCard({
   const available = tool.status === "AVAILABLE";
 
   return (
-    <div className="relative">
+    <div className="group relative">
       <Link
         href={`/catalog/${tool.id}`}
-        className="bg-bg-surface rounded-2xl border border-primary-100 overflow-hidden flex flex-col active:scale-[0.98] transition-transform"
+        className="bg-bg-surface rounded-2xl border border-primary-100/60 overflow-hidden flex flex-col shadow-card hover:shadow-glow transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 active:shadow-card"
       >
-        <div className="relative aspect-[4/3] bg-bg">
+        <div className="relative aspect-[4/3] bg-primary-50 overflow-hidden">
           {tool.images[0] ? (
             <Image
               src={tool.images[0]}
               alt={tool.name}
               fill
               sizes="(max-width: 480px) 50vw, 240px"
-              className="object-cover"
+              className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
               unoptimized
             />
           ) : (
@@ -89,13 +89,14 @@ export function ToolCard({
           </div>
         </div>
 
-        <div className="p-3 flex-1 flex flex-col gap-1">
-          <div className="font-bold text-sm leading-tight line-clamp-2">
-            {tool.name}
+        <div className="p-3.5 flex-1 flex flex-col gap-1.5">
+          {/* Category label — small, primary-tinted */}
+          <div className="text-[10px] font-semibold text-primary/70 leading-none tracking-wide">
+            {tool.category.name}
           </div>
 
-          <div className="text-[11px] text-text-muted">
-            {TOOL_CATEGORY[tool.category]}
+          <div className="font-bold text-[15px] leading-snug line-clamp-2 text-text">
+            {tool.name}
           </div>
 
           {rating && rating.count > 0 && (
@@ -108,25 +109,36 @@ export function ToolCard({
           )}
 
           <div className="flex items-center gap-1 text-[11px] text-text-muted">
-            <MapPin className="w-3 h-3" aria-hidden />
+            <MapPin className="w-3 h-3 shrink-0" aria-hidden />
             <span className="truncate">{tool.gemach.name}</span>
           </div>
 
-          <div className="text-xs text-text mt-1">
-            {tool.dailyRate > 0
-              ? formatShekel(tool.dailyRate) + " / יום"
-              : "ללא עלות"}
-            {tool.depositAmount > 0 && (
-              <span className="text-text-muted">
-                {" · פיקדון "}
-                {formatShekel(tool.depositAmount)}
+          {/* Price footer */}
+          <div className="mt-1.5 pt-2.5 border-t border-primary-50 flex items-baseline justify-between gap-1">
+            {tool.dailyRate > 0 ? (
+              <>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-base font-bold text-primary">
+                    {formatShekel(tool.dailyRate)}
+                  </span>
+                  <span className="text-[10px] text-text-muted">/ יום</span>
+                </div>
+                {tool.depositAmount > 0 && (
+                  <span className="text-[10px] text-text-muted truncate">
+                    פיקדון {formatShekel(tool.depositAmount)}
+                  </span>
+                )}
+              </>
+            ) : (
+              <span className="text-xs font-semibold text-success">
+                ללא עלות
               </span>
             )}
           </div>
 
           {!available && nextFreeLabel && (
-            <div className="flex items-center gap-1 text-[11px] text-warning font-medium mt-0.5">
-              <CalendarClock className="w-3 h-3" aria-hidden />
+            <div className="flex items-center gap-1 text-[11px] text-warning font-medium">
+              <CalendarClock className="w-3 h-3 shrink-0" aria-hidden />
               {nextFreeLabel}
             </div>
           )}
@@ -135,7 +147,7 @@ export function ToolCard({
 
       {/* Favorite heart — sibling of the Link (avoids button-in-anchor) */}
       {favorite !== undefined && (
-        <div className="absolute top-2 left-2">
+        <div className="absolute top-2 left-2 z-10">
           <FavoriteButton toolId={tool.id} initialFavorite={favorite} compact />
         </div>
       )}

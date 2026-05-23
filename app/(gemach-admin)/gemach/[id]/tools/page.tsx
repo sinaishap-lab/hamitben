@@ -6,7 +6,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { TOOL_CATEGORY, TOOL_STATUS } from "@/lib/labels";
+import { TOOL_STATUS } from "@/lib/labels";
 import { formatShekel } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -35,7 +35,7 @@ export default async function GemachToolsPage({
     select: {
       id: true,
       name: true,
-      category: true,
+      category: { select: { name: true } },
       images: true,
       status: true,
       depositAmount: true,
@@ -98,7 +98,7 @@ export default async function GemachToolsPage({
                   <div className="min-w-0">
                     <div className="font-bold truncate">{t.name}</div>
                     <div className="text-xs text-text-muted">
-                      {TOOL_CATEGORY[t.category]}
+                      {t.category.name}
                     </div>
                   </div>
                   <Badge

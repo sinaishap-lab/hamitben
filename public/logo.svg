@@ -1,27 +1,29 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="המתבן">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#5E8F6E"/>
-      <stop offset="1" stop-color="#4A7C59"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2D5C6E"/>
+      <stop offset="1" stop-color="#1F4A5C"/>
+    </linearGradient>
+    <linearGradient id="grain" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#DEB446"/>
+      <stop offset="1" stop-color="#B88528"/>
     </linearGradient>
   </defs>
-  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
-  <!-- Wheat stem -->
-  <g transform="translate(256 256)" fill="#D4A843" stroke="#8B5E3C" stroke-width="6" stroke-linejoin="round">
-    <!-- Central stem -->
-    <rect x="-6" y="-150" width="12" height="280" rx="4" fill="#8B5E3C" stroke="none"/>
-    <!-- Wheat grains in chevron pattern -->
-    <g stroke-linecap="round">
-      <ellipse cx="-32" cy="-110" rx="22" ry="38" transform="rotate(-30 -32 -110)"/>
-      <ellipse cx="32"  cy="-110" rx="22" ry="38" transform="rotate(30 32 -110)"/>
-      <ellipse cx="-36" cy="-50"  rx="22" ry="38" transform="rotate(-30 -36 -50)"/>
-      <ellipse cx="36"  cy="-50"  rx="22" ry="38" transform="rotate(30 36 -50)"/>
-      <ellipse cx="-40" cy="10"   rx="22" ry="38" transform="rotate(-30 -40 10)"/>
-      <ellipse cx="40"  cy="10"   rx="22" ry="38" transform="rotate(30 40 10)"/>
-      <ellipse cx="-44" cy="70"   rx="22" ry="38" transform="rotate(-30 -44 70)"/>
-      <ellipse cx="44"  cy="70"   rx="22" ry="38" transform="rotate(30 44 70)"/>
-      <!-- Top tip -->
-      <ellipse cx="0" cy="-150" rx="18" ry="36"/>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <g transform="translate(256 270)" stroke-linejoin="round">
+    <!-- Stem in mid-teal — the lion's softer accent color -->
+    <rect x="-7" y="-160" width="14" height="290" rx="7" fill="#3D7A8B"/>
+    <!-- Wheat grains in gold gradient -->
+    <g fill="url(#grain)" stroke="#704F18" stroke-width="4" stroke-linecap="round">
+      <ellipse cx="-32" cy="-120" rx="22" ry="38" transform="rotate(-30 -32 -120)"/>
+      <ellipse cx="32"  cy="-120" rx="22" ry="38" transform="rotate(30 32 -120)"/>
+      <ellipse cx="-36" cy="-60"  rx="22" ry="38" transform="rotate(-30 -36 -60)"/>
+      <ellipse cx="36"  cy="-60"  rx="22" ry="38" transform="rotate(30 36 -60)"/>
+      <ellipse cx="-40" cy="0"    rx="22" ry="38" transform="rotate(-30 -40 0)"/>
+      <ellipse cx="40"  cy="0"    rx="22" ry="38" transform="rotate(30 40 0)"/>
+      <ellipse cx="-44" cy="60"   rx="22" ry="38" transform="rotate(-30 -44 60)"/>
+      <ellipse cx="44"  cy="60"   rx="22" ry="38" transform="rotate(30 44 60)"/>
+      <ellipse cx="0"   cy="-160" rx="18" ry="36"/>
     </g>
   </g>
 </svg>

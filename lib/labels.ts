@@ -3,7 +3,6 @@ import type {
   DepositStatus,
   UserRole,
   UserStatus,
-  ToolCategory,
   ToolStatus,
 } from "@prisma/client";
 
@@ -35,18 +34,6 @@ export const DEPOSIT_STATUS: Record<DepositStatus, string> = {
   HELD: "נעול",
   RELEASED: "שוחרר",
   CHARGED: "נגבה",
-};
-
-export const TOOL_CATEGORY: Record<ToolCategory, string> = {
-  IRRIGATION: "השקיה",
-  HARVESTING: "קציר ואסיף",
-  SOIL_WORK: "עיבוד קרקע",
-  SPRAYING: "ריסוס",
-  PLANTING: "שתילה",
-  STORAGE: "אחסון",
-  VEHICLES: "רכבים",
-  HAND_TOOLS: "כלי יד",
-  OTHER: "אחר",
 };
 
 export const TOOL_STATUS: Record<ToolStatus, string> = {

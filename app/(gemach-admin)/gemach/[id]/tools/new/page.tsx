@@ -14,10 +14,16 @@ export default async function NewToolPage({
   const session = await auth();
   if (!session?.user) redirect("/login");
 
-  const gemach = await prisma.gemach.findUnique({
-    where: { id: params.id },
-    select: { id: true, name: true, managerId: true },
-  });
+  const [gemach, categories] = await Promise.all([
+    prisma.gemach.findUnique({
+      where: { id: params.id },
+      select: { id: true, name: true, managerId: true },
+    }),
+    prisma.category.findMany({
+      orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+      select: { id: true, name: true },
+    }),
+  ]);
   if (!gemach) notFound();
 
   const isAdmin = session.user.role === "ADMIN";
@@ -33,10 +39,11 @@ export default async function NewToolPage({
 
       <ToolForm
         gemachId={gemach.id}
+        categories={categories}
         initial={{
           name: "",
           description: "",
-          category: "HAND_TOOLS",
+          categoryId: categories[0]?.id ?? "",
           images: [],
           autoApprove: false,
           depositAmount: 0,

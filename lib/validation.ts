@@ -84,18 +84,6 @@ export const gemachUpdateSchema = gemachCreateSchema.omit({ managerPhone: true }
 
 export type GemachUpdateInput = z.infer<typeof gemachUpdateSchema>;
 
-const TOOL_CATEGORIES = [
-  "IRRIGATION",
-  "HARVESTING",
-  "SOIL_WORK",
-  "SPRAYING",
-  "PLANTING",
-  "STORAGE",
-  "VEHICLES",
-  "HAND_TOOLS",
-  "OTHER",
-] as const;
-
 const optionalNum = (min: number, max?: number) =>
   z
     .union([z.number(), z.string()])
@@ -112,7 +100,7 @@ const optionalNum = (min: number, max?: number) =>
 export const toolCreateSchema = z.object({
   name: z.string().trim().min(2, "שם קצר מדי").max(80),
   description: z.string().trim().max(1000).optional().nullable(),
-  category: z.enum(TOOL_CATEGORIES, { message: "קטגוריה לא חוקית" }),
+  categoryId: z.string().min(1, "יש לבחור קטגוריה"),
   images: z.array(z.string().url()).max(5).default([]),
   autoApprove: z.boolean().default(false),
   depositAmount: optionalNum(0).default(0),
@@ -128,10 +116,21 @@ export type ToolUpdateInput = z.infer<typeof toolUpdateSchema>;
 
 export const toolRequestCreateSchema = z.object({
   description: z.string().trim().min(3, "תיאור קצר מדי").max(500),
-  category: z.enum(TOOL_CATEGORIES).optional().nullable(),
+  categoryId: z.string().min(1).optional().nullable(),
   gemachId: z.string().min(1).optional().nullable(),
 });
 export type ToolRequestCreateInput = z.infer<typeof toolRequestCreateSchema>;
+
+// ─── Categories (admin-managed) ───
+export const categoryCreateSchema = z.object({
+  name: z.string().trim().min(2, "שם קצר מדי").max(40, "שם ארוך מדי"),
+  icon: z.string().trim().min(1).max(40).default("Tag"),
+  sortOrder: optionalNum(0, 999).default(0),
+});
+export type CategoryCreateInput = z.infer<typeof categoryCreateSchema>;
+
+export const categoryUpdateSchema = categoryCreateSchema.partial();
+export type CategoryUpdateInput = z.infer<typeof categoryUpdateSchema>;
 
 const isoDate = z
   .string()

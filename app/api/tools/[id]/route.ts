@@ -35,7 +35,7 @@ export async function GET(
       id: true,
       name: true,
       description: true,
-      category: true,
+      category: { select: { id: true, name: true } },
       images: true,
       status: true,
       autoApprove: true,

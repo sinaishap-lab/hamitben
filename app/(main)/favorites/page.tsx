@@ -19,7 +19,7 @@ export default async function FavoritesPage() {
         select: {
           id: true,
           name: true,
-          category: true,
+          category: { select: { name: true } },
           images: true,
           status: true,
           depositAmount: true,

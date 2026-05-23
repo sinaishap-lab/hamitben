@@ -5,7 +5,6 @@ import { Wallet, Calendar, Clock } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Alert } from "@/components/ui/Alert";
-import { TOOL_CATEGORY } from "@/lib/labels";
 import { formatShekel } from "@/lib/utils";
 import { LoanRequestForm } from "./LoanRequestForm";
 
@@ -37,7 +36,7 @@ export default async function NewLoanPage({
       id: true,
       name: true,
       images: true,
-      category: true,
+      category: { select: { name: true } },
       maxDays: true,
       dailyRate: true,
       depositAmount: true,
@@ -118,7 +117,7 @@ export default async function NewLoanPage({
         <div className="min-w-0 flex-1">
           <div className="font-bold truncate">{tool.name}</div>
           <div className="text-xs text-text-muted">
-            {TOOL_CATEGORY[tool.category]} · {tool.gemach.name}
+            {tool.category.name} · {tool.gemach.name}
           </div>
           <div className="text-xs mt-1 flex flex-wrap gap-2">
             <span className="flex items-center gap-1">

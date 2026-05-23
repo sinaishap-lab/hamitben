@@ -2,20 +2,20 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import type { ToolCategory } from "@prisma/client";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/FormField";
 import { Alert } from "@/components/ui/Alert";
-import { TOOL_CATEGORY } from "@/lib/labels";
 
-const CATEGORIES = Object.entries(TOOL_CATEGORY) as [ToolCategory, string][];
-
-type FieldErrors = Partial<Record<"description" | "category" | "gemachId", string[]>>;
+type FieldErrors = Partial<
+  Record<"description" | "categoryId" | "gemachId", string[]>
+>;
 
 export function NewToolRequestForm({
   gemachs,
+  categories,
 }: {
   gemachs: { id: string; name: string }[];
+  categories: { id: string; name: string }[];
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -32,7 +32,7 @@ export function NewToolRequestForm({
     const form = new FormData(e.currentTarget);
     const payload = {
       description: form.get("description"),
-      category: form.get("category") || null,
+      categoryId: form.get("categoryId") || null,
       gemachId: form.get("gemachId") || null,
     };
 
@@ -92,17 +92,21 @@ export function NewToolRequestForm({
         />
       </FormField>
 
-      <FormField label="קטגוריה (אופציונלי)" htmlFor="category" error={errors.category?.[0]}>
+      <FormField
+        label="קטגוריה (אופציונלי)"
+        htmlFor="categoryId"
+        error={errors.categoryId?.[0]}
+      >
         <select
-          id="category"
-          name="category"
+          id="categoryId"
+          name="categoryId"
           defaultValue=""
           className="w-full h-11 px-3 rounded-xl border border-primary-100 bg-bg-surface focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
         >
           <option value="">— לא ידוע —</option>
-          {CATEGORIES.map(([key, label]) => (
-            <option key={key} value={key}>
-              {label}
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
             </option>
           ))}
         </select>

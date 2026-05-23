@@ -15,21 +15,27 @@ export default async function EditToolPage({
   const session = await auth();
   if (!session?.user) redirect("/login");
 
-  const tool = await prisma.tool.findFirst({
-    where: { id: params.toolId, gemachId: params.id, isActive: true },
-    select: {
-      id: true,
-      name: true,
-      description: true,
-      category: true,
-      images: true,
-      autoApprove: true,
-      depositAmount: true,
-      dailyRate: true,
-      maxDays: true,
-      gemach: { select: { id: true, name: true, managerId: true } },
-    },
-  });
+  const [tool, categories] = await Promise.all([
+    prisma.tool.findFirst({
+      where: { id: params.toolId, gemachId: params.id, isActive: true },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        categoryId: true,
+        images: true,
+        autoApprove: true,
+        depositAmount: true,
+        dailyRate: true,
+        maxDays: true,
+        gemach: { select: { id: true, name: true, managerId: true } },
+      },
+    }),
+    prisma.category.findMany({
+      orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+      select: { id: true, name: true },
+    }),
+  ]);
   if (!tool) notFound();
 
   const isAdmin = session.user.role === "ADMIN";
@@ -46,10 +52,11 @@ export default async function EditToolPage({
       <ToolForm
         gemachId={tool.gemach.id}
         toolId={tool.id}
+        categories={categories}
         initial={{
           name: tool.name,
           description: tool.description ?? "",
-          category: tool.category,
+          categoryId: tool.categoryId,
           images: tool.images,
           autoApprove: tool.autoApprove,
           depositAmount: tool.depositAmount,

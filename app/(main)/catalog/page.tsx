@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import type { Prisma, ToolCategory } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { ToolCard } from "@/components/tools/ToolCard";
@@ -40,7 +40,7 @@ export default async function CatalogPage({
 
   const where: Prisma.ToolWhereInput = {
     isActive: true,
-    ...(category ? { category: category as ToolCategory } : {}),
+    ...(category ? { categoryId: category } : {}),
     ...(gemachId ? { gemachId } : {}),
     ...(q
       ? {
@@ -72,14 +72,14 @@ export default async function CatalogPage({
   const session = await auth();
   const userId = session?.user?.id;
 
-  const [tools, gemachs, favorites] = await Promise.all([
+  const [tools, gemachs, categories, favorites] = await Promise.all([
     prisma.tool.findMany({
       where,
       orderBy: { createdAt: "desc" }, // newest first
       select: {
         id: true,
         name: true,
-        category: true,
+        category: { select: { name: true } },
         images: true,
         status: true,
         depositAmount: true,
@@ -93,6 +93,10 @@ export default async function CatalogPage({
       where: { isActive: true },
       orderBy: { name: "asc" },
       select: { id: true, name: true },
+    }),
+    prisma.category.findMany({
+      orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+      select: { id: true, name: true, icon: true },
     }),
     userId
       ? prisma.favorite.findMany({
@@ -147,15 +151,19 @@ export default async function CatalogPage({
   const newThreshold = Date.now() - NEW_TOOL_DAYS * DAY_MS;
 
   return (
-    <div className="px-4 py-4 flex flex-col gap-4">
-      <header>
-        <h1 className="text-2xl font-bold text-primary text-center">
+    <div className="px-4 py-5 flex flex-col gap-5">
+      <header className="text-center flex flex-col items-center gap-2">
+        <h1 className="text-3xl font-bold text-primary tracking-tight">
           קטלוג כלים
         </h1>
+        <div className="h-0.5 w-12 rounded-full bg-gradient-accent" />
+        <p className="text-sm text-text-muted max-w-xs">
+          כל הכלים החקלאיים של הקהילה — במקום אחד
+        </p>
       </header>
 
       <Suspense fallback={<div className="text-text-muted">טוען סינון...</div>}>
-        <ToolFilters gemachs={gemachs} />
+        <ToolFilters gemachs={gemachs} categories={categories} />
       </Suspense>
 
       {tools.length === 0 ? (

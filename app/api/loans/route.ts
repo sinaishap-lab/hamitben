@@ -73,7 +73,7 @@ export async function GET(req: Request) {
           id: true,
           name: true,
           images: true,
-          category: true,
+          category: { select: { name: true } },
           gemach: { select: { id: true, name: true } },
         },
       },

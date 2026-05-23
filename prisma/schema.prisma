@@ -102,7 +102,8 @@ model Tool {
   id            String       @id @default(cuid())
   name          String
   description   String?
-  category      ToolCategory
+  categoryId    String
+  category      Category     @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   images        String[] // Cloudinary URLs
   status        ToolStatus   @default(AVAILABLE)
   autoApprove   Boolean      @default(false)
@@ -121,23 +122,26 @@ model Tool {
   favorites Favorite[]
 }
 
-enum ToolCategory {
-  IRRIGATION
-  HARVESTING
-  SOIL_WORK
-  SPRAYING
-  PLANTING
-  STORAGE
-  VEHICLES
-  HAND_TOOLS
-  OTHER
-}
-
 enum ToolStatus {
   AVAILABLE
   LOANED
   MAINTENANCE
   INACTIVE
+}
+
+// ───────────────────────────────
+// CATEGORIES – admin-managed tool categories (replaces ToolCategory enum)
+// ───────────────────────────────
+model Category {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  icon      String   @default("Tag") // lucide icon key — see lib/category-icons.ts
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tools        Tool[]
+  toolRequests ToolRequest[]
 }
 
 // ───────────────────────────────
@@ -316,7 +320,8 @@ enum ToolDonationRequestStatus {
 model ToolRequest {
   id          String            @id @default(cuid())
   description String
-  category    ToolCategory?
+  categoryId  String?
+  category    Category?         @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   status      ToolRequestStatus @default(PENDING)
   createdAt   DateTime          @default(now())
 

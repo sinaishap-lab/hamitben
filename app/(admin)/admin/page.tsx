@@ -9,6 +9,7 @@ import {
   Globe,
   Gift,
   ClipboardList,
+  Tag,
 } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -31,6 +32,7 @@ export default async function AdminHomePage() {
     gemachRequests,
     toolDonations,
     donationsTotal,
+    categoriesCount,
   ] = await Promise.all([
     prisma.user.count({ where: { status: "PENDING", deletedAt: null } }),
     prisma.user.count({ where: { isBanned: true, deletedAt: null } }),
@@ -45,6 +47,7 @@ export default async function AdminHomePage() {
       where: { status: "COMPLETED" },
       _sum: { amount: true },
     }),
+    prisma.category.count(),
   ]);
 
   return (
@@ -82,6 +85,12 @@ export default async function AdminHomePage() {
             icon={Sprout}
             title="גמחים"
             sub={`${gemachs} פעילים`}
+          />
+          <Tile
+            href="/admin/categories"
+            icon={Tag}
+            title="קטגוריות"
+            sub={`${categoriesCount} קטגוריות כלים`}
           />
           <Tile
             href="/admin/tool-requests"

@@ -2,6 +2,7 @@
 // Run with: npx prisma db seed
 import { PrismaClient, UserRole, UserStatus } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { DEFAULT_CATEGORIES } from "./category-seed";
 
 const prisma = new PrismaClient();
 
@@ -72,6 +73,16 @@ async function main() {
     },
   });
   console.log(`✓ admin: ${admin.phone} (default password: ${adminPassword})`);
+
+  // Tool categories (admin-managed — spec §20)
+  for (const c of DEFAULT_CATEGORIES) {
+    await prisma.category.upsert({
+      where: { name: c.name },
+      update: { icon: c.icon, sortOrder: c.sortOrder },
+      create: { name: c.name, icon: c.icon, sortOrder: c.sortOrder },
+    });
+  }
+  console.log(`✓ categories: ${DEFAULT_CATEGORIES.length}`);
 
   // Three launch gemachs, each with a manager user
   for (const g of GEMACHS) {

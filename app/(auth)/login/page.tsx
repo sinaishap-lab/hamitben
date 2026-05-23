@@ -122,6 +122,17 @@ export default function LoginPage() {
           הרשמה
         </Link>
       </p>
+
+      {/* Illustration — below the form + register link. mix-blend-multiply
+          lets the page background show through the image's white pixels,
+          simulating a transparent background. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/dafknisa.png"
+        alt=""
+        aria-hidden
+        className="w-full h-auto mix-blend-multiply"
+      />
     </div>
   );
 }
