@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Upload, X, Loader2, Link as LinkIcon } from "lucide-react";
+import { Upload, Camera, X, Loader2, Link as LinkIcon } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Alert } from "@/components/ui/Alert";
@@ -160,27 +160,55 @@ export function ImageUploader({
       )}
 
       {canAdd && !fallbackMode && (
-        <label className="flex items-center justify-center gap-2 h-12 rounded-xl border-2 border-dashed border-primary-200 text-primary cursor-pointer hover:bg-primary-50">
-          {uploading ? (
-            <Loader2 className="w-5 h-5 animate-spin" aria-hidden />
-          ) : (
-            <Upload className="w-5 h-5" aria-hidden />
-          )}
-          <span className="text-sm">
-            {uploading ? "מעלה..." : "העלה תמונה"}
-          </span>
-          <input
-            type="file"
-            accept="image/*"
-            className="sr-only"
-            disabled={uploading}
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) handleFile(file);
-              e.target.value = "";
-            }}
-          />
-        </label>
+        <div className="grid grid-cols-2 gap-2">
+          {/* Take a photo — on mobile capture="environment" opens the back
+              camera directly; on desktop it falls back to the file picker. */}
+          <label className="flex items-center justify-center gap-2 h-12 rounded-xl border-2 border-dashed border-primary-200 text-primary cursor-pointer hover:bg-primary-50 transition-colors">
+            {uploading ? (
+              <Loader2 className="w-5 h-5 animate-spin" aria-hidden />
+            ) : (
+              <Camera className="w-5 h-5" aria-hidden />
+            )}
+            <span className="text-sm">
+              {uploading ? "מעלה..." : "צלם תמונה"}
+            </span>
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="sr-only"
+              disabled={uploading}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleFile(file);
+                e.target.value = "";
+              }}
+            />
+          </label>
+
+          {/* Pick from the gallery / file system. */}
+          <label className="flex items-center justify-center gap-2 h-12 rounded-xl border-2 border-dashed border-primary-200 text-primary cursor-pointer hover:bg-primary-50 transition-colors">
+            {uploading ? (
+              <Loader2 className="w-5 h-5 animate-spin" aria-hidden />
+            ) : (
+              <Upload className="w-5 h-5" aria-hidden />
+            )}
+            <span className="text-sm">
+              {uploading ? "מעלה..." : "העלה תמונה"}
+            </span>
+            <input
+              type="file"
+              accept="image/*"
+              className="sr-only"
+              disabled={uploading}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleFile(file);
+                e.target.value = "";
+              }}
+            />
+          </label>
+        </div>
       )}
 
       {canAdd && fallbackMode && (

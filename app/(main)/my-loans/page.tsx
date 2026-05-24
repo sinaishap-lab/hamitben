@@ -117,7 +117,7 @@ export default async function MyLoansPage({
       </nav>
 
       {loans.length === 0 ? (
-        <div className="text-center py-10 flex flex-col items-center gap-3">
+        <div className="text-center py-6 flex flex-col items-center gap-3">
           <p className="text-text-muted">אין השאלות בקטגוריה זו.</p>
           <Link
             href="/catalog"
@@ -215,6 +215,15 @@ export default async function MyLoansPage({
           })}
         </ul>
       )}
+
+      {/* Illustration — always visible, below the loans list. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/hahashalot.png"
+        alt=""
+        aria-hidden
+        className="w-full max-w-xs h-auto mx-auto mix-blend-multiply mt-2"
+      />
     </div>
   );
 }

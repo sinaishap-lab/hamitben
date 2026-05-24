@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Wheat, HandCoins, Wrench, Sprout, Coins, Users, Globe } from "lucide-react";
+import { HandCoins, Wrench, Globe } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -10,36 +10,20 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <div className="px-4 py-6 flex flex-col gap-6">
-      {/* Hero */}
-      <header className="text-center">
-        <div className="mx-auto w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-3">
-          <Wheat className="w-10 h-10 text-primary" aria-hidden />
-        </div>
-        <h1 className="text-2xl font-bold text-primary">המתבן</h1>
-        <p className="text-sm text-text-muted mt-1 max-w-xs mx-auto">
-          חקלאות שיתופית — כי יחד עושים יותר מכל אחד לבד
-        </p>
+      {/* מי אנחנו — page title */}
+      <header className="text-center flex flex-col items-center gap-2">
+        <h1 className="text-3xl font-bold text-primary tracking-tight">
+          מי אנחנו
+        </h1>
+        <div className="h-0.5 w-12 rounded-full bg-gradient-accent" />
       </header>
 
-      {/* About */}
-      <section className="bg-bg-surface rounded-2xl border border-primary-100 p-4">
-        <h2 className="font-bold mb-2">מי אנחנו?</h2>
-        <p className="text-sm leading-relaxed text-text">
-          המתבן הוא פלטפורמה קהילתית להשאלת כלי עבודה חקלאיים בין חברי גמחים
-          באזורים שונים. במקום שכל חקלאי יקנה לעצמו מסור, מרסס או חרמש — אנחנו
-          מאגדים את הכלים בגמחים שיתופיים, בקרבה לבית.
-        </p>
-      </section>
-
-      {/* Why */}
-      <section>
-        <h2 className="font-bold mb-2 text-center">למה המתבן?</h2>
-        <div className="grid grid-cols-3 gap-3">
-          <Highlight icon={Coins} label="חיסכון" />
-          <Highlight icon={Users} label="קהילה" />
-          <Highlight icon={Sprout} label="שמירת האדמה" />
-        </div>
-      </section>
+      {/* About copy — plain on the page background, no card */}
+      <p className="text-sm leading-relaxed text-text text-center max-w-md mx-auto">
+        המתבן הוא פלטפורמה קהילתית להשאלת כלי עבודה חקלאיים בין חברי גמחים
+        באזורים שונים. במקום שכל חקלאי יקנה לעצמו מסור, מרסס או חרמש —
+        אנחנו מאגדים את הכלים בגמחים שיתופיים, בקרבה לבית.
+      </p>
 
       {/* Take part */}
       <section>
@@ -82,15 +66,6 @@ export default function AboutPage() {
   );
 }
 
-function Highlight({ icon: Icon, label }: { icon: typeof Coins; label: string }) {
-  return (
-    <div className="rounded-xl bg-bg-surface p-3 border border-primary-100 text-center">
-      <Icon className="w-6 h-6 text-primary mx-auto" aria-hidden />
-      <div className="text-xs text-text-muted mt-1">{label}</div>
-    </div>
-  );
-}
-
 function CtaTile({
   href,
   icon: Icon,
@@ -106,7 +81,7 @@ function CtaTile({
     <li>
       <Link
         href={href}
-        className="bg-bg-surface rounded-2xl border border-primary-100 p-4 flex items-center gap-3 active:scale-[0.98] transition-transform"
+        className="bg-bg-surface rounded-2xl border border-primary-100/60 shadow-card hover:shadow-glow p-4 flex items-center gap-3 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
       >
         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
           <Icon className="w-5 h-5 text-primary" aria-hidden />
