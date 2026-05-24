@@ -27,12 +27,9 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
   },
   icons: {
-    icon: [
-      { url: "/icon-192.svg", sizes: "192x192", type: "image/svg+xml" },
-      { url: "/icon-512.svg", sizes: "512x512", type: "image/svg+xml" },
-    ],
-    shortcut: "/icon-192.svg",
-    apple: "/icon-192.svg",
+    icon: [{ url: "/logo.png", type: "image/png" }],
+    shortcut: "/logo.png",
+    apple: "/logo.png",
   },
   formatDetection: {
     telephone: true,
@@ -40,7 +37,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#4A7C59",
+  themeColor: "#1F4A5C",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
