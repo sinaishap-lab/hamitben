@@ -4,6 +4,7 @@ import "./globals.css";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { TopBar } from "@/components/layout/TopBar";
 import { Providers } from "@/components/providers";
+import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistration";
 
 const heebo = Heebo({
   subsets: ["hebrew", "latin"],
@@ -55,6 +56,7 @@ export default function RootLayout({
             <main className="flex-1 pb-20 pt-2">{children}</main>
             <BottomNav />
           </div>
+          <ServiceWorkerRegistration />
         </Providers>
       </body>
     </html>

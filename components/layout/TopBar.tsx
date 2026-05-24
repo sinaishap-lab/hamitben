@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Shield } from "lucide-react";
 import { auth } from "@/lib/auth";
+import { InstallAppButton } from "@/components/pwa/InstallAppButton";
 
 export async function TopBar() {
   const session = await auth();
@@ -31,6 +32,10 @@ export async function TopBar() {
         </Link>
 
         <div className="flex items-center gap-2">
+          {/* PWA install — surfaces itself only when the browser fires
+              `beforeinstallprompt` (and disappears after install). */}
+          <InstallAppButton />
+
           {isAdmin && (
             <Link
               href="/admin"
