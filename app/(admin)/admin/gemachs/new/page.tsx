@@ -4,10 +4,18 @@ import { NewGemachForm } from "./NewGemachForm";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminNewGemachPage() {
+export default async function AdminNewGemachPage({
+  searchParams,
+}: {
+  searchParams: { managerPhone?: string };
+}) {
   const session = await auth();
   if (!session?.user) redirect("/login");
   if (session.user.role !== "ADMIN") redirect("/");
+
+  // When linked from the user edit page ("פתח גמח חדש למשתמש זה") the
+  // manager's phone is pre-filled so the admin doesn't have to retype it.
+  const prefilledManagerPhone = searchParams.managerPhone ?? "";
 
   return (
     <div className="px-4 py-6 flex flex-col gap-4">
@@ -17,7 +25,7 @@ export default async function AdminNewGemachPage() {
           המנהל חייב להיות משתמש קיים ומאושר. הוא יקודם אוטומטית לתפקיד &quot;מנהל גמח&quot;.
         </p>
       </header>
-      <NewGemachForm />
+      <NewGemachForm prefilledManagerPhone={prefilledManagerPhone} />
     </div>
   );
 }

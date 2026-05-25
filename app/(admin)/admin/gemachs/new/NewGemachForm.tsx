@@ -11,7 +11,11 @@ type FieldErrors = Partial<
   Record<"name" | "address" | "phone" | "managerPhone" | "description", string[]>
 >;
 
-export function NewGemachForm() {
+export function NewGemachForm({
+  prefilledManagerPhone = "",
+}: {
+  prefilledManagerPhone?: string;
+}) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -107,6 +111,7 @@ export function NewGemachForm() {
           type="tel"
           dir="ltr"
           required
+          defaultValue={prefilledManagerPhone}
           invalid={!!errors.managerPhone}
         />
       </FormField>

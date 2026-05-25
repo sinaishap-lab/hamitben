@@ -52,6 +52,24 @@ export const profileUpdateSchema = z.object({
 
 export type ProfileUpdateInput = z.infer<typeof profileUpdateSchema>;
 
+// Admin-only — change anything about a user. UI guards self-modification of
+// role/status/isBanned; the API also enforces it as a safety net.
+export const userAdminUpdateSchema = z.object({
+  name: z.string().trim().min(2, "שם קצר מדי").max(80).optional(),
+  phone: israeliPhone.optional(),
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .email("כתובת אימייל לא תקינה")
+    .optional(),
+  role: z.enum(["REGULAR", "GEMACH_MANAGER", "ADMIN"]).optional(),
+  status: z.enum(["PENDING", "APPROVED", "REJECTED", "SUSPENDED"]).optional(),
+  isBanned: z.boolean().optional(),
+  banReason: z.string().trim().max(300).optional().nullable(),
+});
+export type UserAdminUpdateInput = z.infer<typeof userAdminUpdateSchema>;
+
 const optionalCoord = z
   .union([z.number(), z.string()])
   .optional()
@@ -80,7 +98,9 @@ export const gemachCreateSchema = z.object({
 
 export type GemachCreateInput = z.infer<typeof gemachCreateSchema>;
 
-export const gemachUpdateSchema = gemachCreateSchema.omit({ managerPhone: true }).partial();
+// Update keeps every field optional, including managerPhone — admin can use
+// it to reassign the gemach to a different manager (handled in the PUT route).
+export const gemachUpdateSchema = gemachCreateSchema.partial();
 
 export type GemachUpdateInput = z.infer<typeof gemachUpdateSchema>;
 

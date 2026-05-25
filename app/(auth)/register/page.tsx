@@ -173,22 +173,9 @@ export default function RegisterPage() {
         </p>
       </header>
 
-      {/* Form wrapped in a relative container; illustration sits behind it
-          as a semi-transparent watermark, the fields stay legible on top. */}
-      <div className="relative">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/harshamapage.png"
-          alt=""
-          aria-hidden
-          className="pointer-events-none absolute inset-0 w-full h-full object-contain opacity-20"
-        />
-        <div className="relative z-10">
-          <Suspense fallback={<div className="text-text-muted">טוען...</div>}>
-            <RegisterForm />
-          </Suspense>
-        </div>
-      </div>
+      <Suspense fallback={<div className="text-text-muted">טוען...</div>}>
+        <RegisterForm />
+      </Suspense>
 
       <p className="text-center text-sm text-text-muted">
         כבר רשום?{" "}
@@ -196,6 +183,17 @@ export default function RegisterPage() {
           התחבר
         </Link>
       </p>
+
+      {/* Illustration — below the form + login link, full opacity.
+          mix-blend-multiply lets the page background show through the
+          image's white pixels, mimicking a transparent background. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/harshamapage.png"
+        alt=""
+        aria-hidden
+        className="w-full h-auto mix-blend-multiply"
+      />
     </div>
   );
 }

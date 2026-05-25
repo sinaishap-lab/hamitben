@@ -1,37 +1,46 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { UserStatus } from "@prisma/client";
+import { Pencil, Trash2, Check } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
 
-type Props = {
+/**
+ * Simplified user actions:
+ *  - PENDING users get a one-click "אשר" alongside Edit + Delete.
+ *  - Everyone else gets just Edit + Delete.
+ *  - Self-delete is hidden so the current admin can't accidentally remove
+ *    themselves from the admin panel (they can still self-delete via /profile).
+ */
+export function UserActions({
+  userId,
+  isSelf,
+  isPending,
+  userName,
+}: {
   userId: string;
-  status: UserStatus;
-  isBanned: boolean;
-};
-
-type ActionKey = "approve" | "reject" | "suspend" | "ban" | "unban";
-
-export function UserActions({ userId, status, isBanned }: Props) {
+  isSelf: boolean;
+  isPending: boolean;
+  userName: string;
+}) {
   const router = useRouter();
-  const [pending, startTransition] = useTransition();
-  const [busy, setBusy] = useState<ActionKey | null>(null);
+  const [transition, startTransition] = useTransition();
+  const [busy, setBusy] = useState<"approve" | "delete" | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
-  async function run(action: ActionKey) {
+  async function approve() {
     setErr(null);
-    setBusy(action);
+    setBusy("approve");
     try {
-      const res = await fetch(`/api/users/${userId}/${action}`, {
+      const res = await fetch(`/api/users/${userId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: action === "ban" ? JSON.stringify({}) : undefined,
+        body: JSON.stringify({ status: "APPROVED" }),
       });
       if (!res.ok) {
-        setErr("הפעולה נכשלה");
-        setBusy(null);
+        setErr("האישור נכשל");
         return;
       }
       startTransition(() => router.refresh());
@@ -42,87 +51,66 @@ export function UserActions({ userId, status, isBanned }: Props) {
     }
   }
 
-  const disabled = pending || busy !== null;
+  async function remove() {
+    if (!confirm(`למחוק את "${userName}"? היסטוריית ההשאלות תישמר בצורה אנונימית.`)) {
+      return;
+    }
+    setErr(null);
+    setBusy("delete");
+    try {
+      const res = await fetch(`/api/users/${userId}`, { method: "DELETE" });
+      if (!res.ok) {
+        setErr("המחיקה נכשלה");
+        return;
+      }
+      startTransition(() => router.refresh());
+    } catch {
+      setErr("בעיית רשת");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  const disabled = transition || busy !== null;
 
   return (
-    <div className="flex flex-wrap gap-2 mt-1">
+    <div className="flex flex-wrap gap-2 mt-1 items-center">
       {err && <Alert variant="error" className="w-full">{err}</Alert>}
 
-      {status === "PENDING" && (
-        <>
-          <Button
-            size="sm"
-            variant="primary"
-            loading={busy === "approve"}
-            disabled={disabled}
-            onClick={() => run("approve")}
-            className="w-auto"
-          >
-            אשר
-          </Button>
-          <Button
-            size="sm"
-            variant="danger"
-            loading={busy === "reject"}
-            disabled={disabled}
-            onClick={() => run("reject")}
-            className="w-auto"
-          >
-            דחה
-          </Button>
-        </>
-      )}
-
-      {status === "APPROVED" && !isBanned && (
-        <Button
-          size="sm"
-          variant="outline"
-          loading={busy === "suspend"}
-          disabled={disabled}
-          onClick={() => run("suspend")}
-          className="w-auto"
-        >
-          השעה
-        </Button>
-      )}
-
-      {status === "SUSPENDED" && (
+      {isPending && (
         <Button
           size="sm"
           variant="primary"
           loading={busy === "approve"}
           disabled={disabled}
-          onClick={() => run("approve")}
+          onClick={approve}
           className="w-auto"
         >
-          החזר לפעילות
+          <Check className="w-4 h-4" />
+          אשר
         </Button>
       )}
 
-      {isBanned ? (
+      <Link
+        href={`/admin/users/${userId}/edit`}
+        className="inline-flex items-center justify-center gap-1.5 px-3.5 h-9 rounded-lg text-sm font-medium border-2 border-primary text-primary bg-bg-surface hover:bg-primary-50 transition-colors"
+      >
+        <Pencil className="w-4 h-4" aria-hidden />
+        ערוך
+      </Link>
+
+      {!isSelf && (
         <Button
           size="sm"
-          variant="primary"
-          loading={busy === "unban"}
+          variant="danger"
+          loading={busy === "delete"}
           disabled={disabled}
-          onClick={() => run("unban")}
+          onClick={remove}
           className="w-auto"
         >
-          הסר חסימה
+          <Trash2 className="w-4 h-4" />
+          מחק
         </Button>
-      ) : (
-        status === "APPROVED" && (
-          <Button
-            size="sm"
-            variant="danger"
-            loading={busy === "ban"}
-            disabled={disabled}
-            onClick={() => run("ban")}
-            className="w-auto"
-          >
-            חסום
-          </Button>
-        )
       )}
     </div>
   );
