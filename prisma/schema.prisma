@@ -171,6 +171,8 @@ model Loan {
   tool   Tool   @relation(fields: [toolId], references: [id])
   userId String
   user   User   @relation(fields: [userId], references: [id])
+
+  receipts Receipt[]
 }
 
 enum LoanStatus {
@@ -256,6 +258,48 @@ model Donation {
   name      String?
   email     String?
   createdAt DateTime @default(now())
+
+  receipts Receipt[]
+}
+
+// ───────────────────────────────
+// RECEIPTS — auto-issued donation receipts (section 46) via iCount.
+// One receipt per successful charge: loan settlement OR direct donation.
+// We persist a row even on failure so admin can retry.
+// ───────────────────────────────
+model Receipt {
+  id            String        @id @default(cuid())
+  amount        Float
+  customerName  String
+  customerEmail String?
+  customerPhone String?
+  description   String
+
+  // External (iCount) tracking
+  externalDocId  String?
+  externalDocUrl String?
+  status         ReceiptStatus @default(PENDING)
+  errorMessage   String?
+  issuedAt       DateTime?
+
+  // Source — exactly one of these should be set in practice.
+  loanId     String?
+  loan       Loan?     @relation(fields: [loanId], references: [id])
+  donationId String?
+  donation   Donation? @relation(fields: [donationId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([loanId])
+  @@index([donationId])
+  @@index([status])
+}
+
+enum ReceiptStatus {
+  PENDING
+  ISSUED
+  FAILED
 }
 
 // ───────────────────────────────

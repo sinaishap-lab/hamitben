@@ -32,17 +32,53 @@ export async function POST(req: Request) {
     select: { id: true },
   });
 
+  const donorName = name ?? "תורם/ת אנונימי/ת";
+  const description = "תרומה לקרן ציון לפיתוח חקלאות, התיישבות וקהילה";
+
   try {
     const result = await getPaymentProvider().chargeFinal({
       loanId: donation.id, // re-using arg as opaque ref
       userId: name ?? "anonymous-donor",
       amount,
-      description: `תרומה למתבן`,
+      description,
+      customer: {
+        name: donorName,
+        email: email ?? null,
+        phone: null,
+      },
     });
     await prisma.donation.update({
       where: { id: donation.id },
       data: { status: "COMPLETED", chargeId: result.chargeId },
     });
+
+    // Persist the receipt the provider issued in the same charge call.
+    // Best-effort — a failure here doesn't fail the donation (the charge
+    // already settled and the PDF was already emailed by Cardcom).
+    if (result.receipt) {
+      try {
+        await prisma.receipt.create({
+          data: {
+            amount,
+            customerName: donorName,
+            customerEmail: email ?? null,
+            customerPhone: null,
+            description,
+            status: "ISSUED",
+            issuedAt: new Date(),
+            externalDocId: result.receipt.externalDocId,
+            externalDocUrl: result.receipt.externalDocUrl,
+            donationId: donation.id,
+          },
+        });
+      } catch (err) {
+        console.error(
+          "[donations.POST] receipt persistence failed (donation already charged)",
+          err
+        );
+      }
+    }
+
     return NextResponse.json(
       { ok: true, id: donation.id, chargeId: result.chargeId },
       { status: 201 }

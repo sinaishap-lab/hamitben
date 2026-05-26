@@ -4,6 +4,7 @@ import { loadLoanForManager } from "@/lib/loans";
 import { loanReturnSchema } from "@/lib/validation";
 import { notifyNextInWaitlist } from "@/lib/waitlist";
 import { getPaymentProvider } from "@/lib/payments";
+import type { IssuedReceiptInfo } from "@/lib/payments";
 import { notifyUser } from "@/lib/notifications";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -51,34 +52,63 @@ export async function PUT(
       ? Math.round(r.loan.dailyRate * days * discountMultiplier * 100) / 100
       : null;
 
+  // Borrower info — passed to the payment provider so the receipt PDF can
+  // be issued in the same charge call (Cardcom Documents).
+  const borrower = await prisma.user.findUnique({
+    where: { id: r.loan.userId },
+    select: { name: true, email: true, phone: true },
+  });
+
   // Payment side-effects BEFORE the DB transaction so we don't end up with
   // RETURNED rows that never actually settled the deposit. If a payment call
   // throws, we abort and leave the loan ACTIVE so the manager can retry.
   const provider = getPaymentProvider();
   let paymentChargeId: string | null = null;
+  let issuedReceipt: IssuedReceiptInfo | null = null;
+  const receiptDescription =
+    outcome === "OK"
+      ? `השאלת ${r.loan.tool.name} — ${days} ימים`
+      : `השאלת ${r.loan.tool.name} — חיוב פיקדון (החזרה באיחור/נזק)`;
 
   try {
     if (outcome === "OK") {
       if (r.loan.depositStatus === "HELD" && r.loan.depositChargeId) {
         await provider.voidDeposit({ chargeId: r.loan.depositChargeId });
       }
-      if (totalCharged !== null && totalCharged > 0) {
+      if (totalCharged !== null && totalCharged > 0 && borrower) {
         const final = await provider.chargeFinal({
           loanId: r.loan.id,
           userId: r.loan.userId,
           amount: totalCharged,
-          description: `חיוב סופי – ${days} ימי השאלה`,
+          description: receiptDescription,
+          customer: {
+            name: borrower.name,
+            email: borrower.email,
+            phone: borrower.phone,
+          },
         });
         paymentChargeId = final.chargeId;
+        if (final.receipt) issuedReceipt = final.receipt;
       }
     } else {
       // OVERDUE – capture the held deposit (full amount)
-      if (r.loan.depositStatus === "HELD" && r.loan.depositChargeId) {
+      if (
+        r.loan.depositStatus === "HELD" &&
+        r.loan.depositChargeId &&
+        borrower
+      ) {
         const cap = await provider.captureDeposit({
           chargeId: r.loan.depositChargeId,
           amount: r.loan.depositAmount,
+          description: receiptDescription,
+          customer: {
+            name: borrower.name,
+            email: borrower.email,
+            phone: borrower.phone,
+          },
         });
         paymentChargeId = cap.chargeId;
+        if (cap.receipt) issuedReceipt = cap.receipt;
       }
     }
   } catch (err) {
@@ -149,6 +179,35 @@ export async function PUT(
       ),
     }
   );
+
+  // Persist the receipt that Cardcom (or the stub) issued during the charge.
+  // Best-effort: a failure here does NOT roll back the loan return — the
+  // charge already settled and the PDF was already emailed to the borrower.
+  const chargedAmount =
+    outcome === "OK" ? totalCharged ?? 0 : r.loan.depositAmount;
+  if (issuedReceipt && borrower && chargedAmount > 0) {
+    try {
+      await prisma.receipt.create({
+        data: {
+          amount: chargedAmount,
+          customerName: borrower.name,
+          customerEmail: borrower.email,
+          customerPhone: borrower.phone,
+          description: receiptDescription,
+          status: "ISSUED",
+          issuedAt: new Date(),
+          externalDocId: issuedReceipt.externalDocId,
+          externalDocUrl: issuedReceipt.externalDocUrl,
+          loanId: r.loan.id,
+        },
+      });
+    } catch (err) {
+      console.error(
+        "[loans.return] receipt persistence failed (charge settled, PDF emailed)",
+        err
+      );
+    }
+  }
 
   return NextResponse.json({ ok: true, totalCharged, days });
 }

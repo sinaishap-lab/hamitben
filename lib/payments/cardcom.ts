@@ -1,5 +1,6 @@
 import type {
   CaptureArgs,
+  CaptureResult,
   ChargeArgs,
   ChargeResult,
   DepositHoldArgs,
@@ -19,6 +20,12 @@ import type {
  *     hosted page (recommended; returns to /api/payments/webhook).
  *   - Capture / Void: server-to-server REST.
  *   - Final charge: server-to-server using the stored token.
+ *
+ * Receipt issuance is bundled into the same Cardcom call via the Cardcom
+ * Documents add-on (CreateInvoice / DocumentToCreate params). The donor
+ * gets a "קבלה לתרומה" (section 46) PDF emailed automatically; the API
+ * returns DocumentNumber + DocumentUrl which we surface as `receipt` on
+ * the result so the route handler can persist a Receipt row.
  *
  * API docs: https://kb.cardcom.solutions/article/AA-01416
  */
@@ -92,14 +99,30 @@ export class CardcomPaymentProvider implements PaymentProvider {
     throw new Error("CardcomPaymentProvider.voidDeposit not yet implemented");
   }
 
-  async captureDeposit(_args: CaptureArgs): Promise<{ chargeId: string }> {
+  async captureDeposit(_args: CaptureArgs): Promise<CaptureResult> {
     // ChargeIdentityNumber.aspx or DealInformation flow — capture from
-    // pre-auth into a real charge.
+    // pre-auth into a real charge. Include the Documents block (see
+    // chargeFinal below) so a "קבלה לתרומה" is issued in the same call,
+    // emailed to _args.customer.email, and returned as `receipt`.
     throw new Error("CardcomPaymentProvider.captureDeposit not yet implemented");
   }
 
   async chargeFinal(_args: ChargeArgs): Promise<ChargeResult> {
     // Direct charge via stored token (after first transaction).
+    //
+    // Embed the Documents (Receipt) section in the same request:
+    //   DocumentToCreate          = "5"   ← Receipt for donation (קבלה לתרומה)
+    //   IsCreateInvoice           = "true"
+    //   InvoiceHead.CustName      = _args.customer.name
+    //   InvoiceHead.SendByEmail   = _args.customer.email ? "true" : "false"
+    //   InvoiceHead.Email         = _args.customer.email
+    //   InvoiceHead.Language      = "he"
+    //   InvoiceLines1.Description = _args.description
+    //   InvoiceLines1.Price       = _args.amount.toFixed(2)
+    //   InvoiceLines1.Quantity    = "1"
+    //
+    // Response includes DocumentNumber + DocumentLink → return them as
+    // `receipt: { externalDocId, externalDocUrl }`.
     throw new Error("CardcomPaymentProvider.chargeFinal not yet implemented");
   }
 
