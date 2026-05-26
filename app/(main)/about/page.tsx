@@ -62,6 +62,36 @@ export default function AboutPage() {
           מזרח הגוש · תלם · דרום הר חברון
         </p>
       </section>
+
+      {/* Parent organization — behind HaMatben */}
+      <section className="mt-2 flex flex-col items-center gap-4">
+        <div className="flex items-center gap-2 w-full">
+          <div className="h-px flex-1 bg-primary-100" />
+          <h2 className="font-bold text-sm text-text-muted">מאחורי המתבן</h2>
+          <div className="h-px flex-1 bg-primary-100" />
+        </div>
+        <p className="text-sm leading-relaxed text-text text-center max-w-md mx-auto">
+          המתבן פועל תחת עמותת{" "}
+          <span className="font-bold text-primary">רוג&apos;ום (ע״ר)</span>,
+          במסגרת{" "}
+          <span className="font-bold text-primary">קרן ציון</span> לפיתוח
+          חקלאות, התיישבות וקהילה.
+        </p>
+        <div className="flex items-center justify-center gap-6 mt-1">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/rogum.jpeg"
+            alt="רוג'ום — יזמות ציונית (ע״ר)"
+            className="h-28 w-auto object-contain mix-blend-multiply"
+          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/kerenzion.jpeg"
+            alt="קרן ציון לפיתוח"
+            className="h-28 w-auto object-contain mix-blend-multiply"
+          />
+        </div>
+      </section>
     </div>
   );
 }
