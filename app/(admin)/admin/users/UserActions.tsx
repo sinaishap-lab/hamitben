@@ -34,10 +34,8 @@ export function UserActions({
     setErr(null);
     setBusy("approve");
     try {
-      const res = await fetch(`/api/users/${userId}`, {
+      const res = await fetch(`/api/users/${userId}/approve`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "APPROVED" }),
       });
       if (!res.ok) {
         setErr("האישור נכשל");
