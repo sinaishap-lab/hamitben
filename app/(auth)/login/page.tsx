@@ -105,6 +105,34 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <div className="px-4 py-6 flex flex-col gap-6">
+
+      {/* Who we are — top of page, first thing a visitor sees */}
+      <section className="bg-primary-50/50 rounded-2xl border border-primary-100/60 p-4 flex flex-col gap-3 text-center">
+        <h2 className="font-bold text-base text-primary">מי אנחנו?</h2>
+        <p className="text-xs leading-relaxed text-text">
+          המתבן הוא פלטפורמה חברתית מבית{" "}
+          <span className="font-semibold">קרן ציון לפיתוח</span> — להשאלת
+          כלי עבודה חקלאיים בין חברי קהילת החקלאים שלנו בישראל. במקום שכל
+          חקלאי יקנה לעצמו מחרשה, מקלטרת או מגוב, אנחנו מאגדים את הכלים
+          בגמ&quot;חים שיתופיים — כך לכולם יש את כל הכלים.
+        </p>
+        {/* Organization logos */}
+        <div className="flex items-center justify-center gap-6 pt-1">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/rogum.jpeg"
+            alt="רוג'ום — יזמות ציונית (ע״ר)"
+            className="h-16 w-auto object-contain mix-blend-multiply"
+          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/kerenzion.jpeg"
+            alt="קרן ציון לפיתוח"
+            className="h-16 w-auto object-contain mix-blend-multiply"
+          />
+        </div>
+      </section>
+
       <header>
         <h1 className="text-2xl font-bold text-primary">כניסה</h1>
         <p className="text-sm text-text-muted mt-1">
@@ -123,21 +151,7 @@ export default function LoginPage() {
         </Link>
       </p>
 
-      {/* Who we are — short teaser for first-time visitors */}
-      <section className="bg-primary-50/50 rounded-2xl border border-primary-100/60 p-4 flex flex-col gap-2 text-center">
-        <h2 className="font-bold text-sm text-primary">מי אנחנו?</h2>
-        <p className="text-xs leading-relaxed text-text">
-          המתבן הוא פלטפורמה חברתית מבית{" "}
-          <span className="font-semibold">קרן ציון לפיתוח</span> — להשאלת
-          כלי עבודה חקלאיים בין חברי קהילת החקלאים שלנו בישראל. במקום שכל
-          חקלאי יקנה לעצמו מחרשה, מקלטרת או מגוב, אנחנו מאגדים את הכלים
-          בגמ&quot;חים שיתופיים — כך לכולם יש את כל הכלים.
-        </p>
-      </section>
-
-      {/* Illustration — below the form + register link. mix-blend-multiply
-          lets the page background show through the image's white pixels,
-          simulating a transparent background. */}
+      {/* Illustration */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/dafknisa.png"
