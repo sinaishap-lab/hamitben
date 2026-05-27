@@ -123,6 +123,18 @@ export default function LoginPage() {
         </Link>
       </p>
 
+      {/* Who we are — short teaser for first-time visitors */}
+      <section className="bg-primary-50/50 rounded-2xl border border-primary-100/60 p-4 flex flex-col gap-2 text-center">
+        <h2 className="font-bold text-sm text-primary">מי אנחנו?</h2>
+        <p className="text-xs leading-relaxed text-text">
+          המתבן הוא פלטפורמה חברתית מבית{" "}
+          <span className="font-semibold">קרן ציון לפיתוח</span> — להשאלת
+          כלי עבודה חקלאיים בין חברי קהילת החקלאים שלנו בישראל. במקום שכל
+          חקלאי יקנה לעצמו מחרשה, מקלטרת או מגוב, אנחנו מאגדים את הכלים
+          בגמ&quot;חים שיתופיים — כך לכולם יש את כל הכלים.
+        </p>
+      </section>
+
       {/* Illustration — below the form + register link. mix-blend-multiply
           lets the page background show through the image's white pixels,
           simulating a transparent background. */}

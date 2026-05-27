@@ -18,12 +18,20 @@ export default function AboutPage() {
         <div className="h-0.5 w-12 rounded-full bg-gradient-accent" />
       </header>
 
-      {/* About copy — plain on the page background, no card */}
-      <p className="text-sm leading-relaxed text-text text-center max-w-md mx-auto">
-        המתבן הוא פלטפורמה קהילתית להשאלת כלי עבודה חקלאיים בין חברי גמחים
-        באזורים שונים. במקום שכל חקלאי יקנה לעצמו מסור, מרסס או חרמש —
-        אנחנו מאגדים את הכלים בגמחים שיתופיים, בקרבה לבית.
-      </p>
+      {/* About copy */}
+      <div className="flex flex-col gap-3 text-sm leading-relaxed text-text text-center max-w-md mx-auto">
+        <p>
+          המתבן הוא פלטפורמה חברתית מבית{" "}
+          <span className="font-bold text-primary">קרן ציון לפיתוח</span> —
+          להשאלת כלי עבודה חקלאיים בין חברי קהילת החקלאים שלנו בישראל.
+        </p>
+        <p>
+          במקום שכל חקלאי יקנה לעצמו מחרשה, מקלטרת או מגוב, אנחנו מאגדים
+          את הכלים בגמ&quot;חים שיתופיים. כך — לכל החקלאים יש את כל הכלים
+          כדי לעשות מקסימום חקלאות על מקסימום שטח.
+        </p>
+        <p className="font-bold text-primary">תצטרפו אלינו!</p>
+      </div>
 
       {/* Take part */}
       <section>
