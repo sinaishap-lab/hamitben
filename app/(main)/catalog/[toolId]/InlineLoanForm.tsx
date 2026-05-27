@@ -6,20 +6,10 @@ import { useRouter } from "next/navigation";
 import { Gift } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
-import { formatShekel } from "@/lib/utils";
+import { formatShekel, formatDateHe } from "@/lib/utils";
 import { ToolCalendar } from "./ToolCalendar";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-
-// Pretty-print "21 במאי 2026" — local helper so we avoid an extra round-trip
-function formatDateHe(dateKey: string): string {
-  const d = new Date(dateKey);
-  return new Intl.DateTimeFormat("he-IL", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(d);
-}
 
 type FieldErrors = Partial<Record<"startDate" | "endDate" | "termsAcknowledged", string[]>>;
 

@@ -30,15 +30,15 @@ export async function POST(req: Request) {
     const adminEmail = process.env.ADMIN_EMAIL;
     const adminPhone = process.env.ADMIN_PHONE;
 
-    const body =
+    const msgBody =
       `📩 *פנייה חדשה ב'צור קשר'*\n\n` +
       `שם: ${name}\nטלפון: ${phone}\nנושא: ${subject}\n\n${message}`;
 
     if (adminEmail) {
-      await sendEmail(adminEmail, `[המתבן] ${subject}`, body);
+      await sendEmail(adminEmail, `[המתבן] ${subject}`, msgBody);
     }
     if (adminPhone) {
-      await sendWhatsApp(adminPhone, body);
+      await sendWhatsApp(adminPhone, msgBody);
     }
     if (!adminEmail && !adminPhone) {
       // Fallback: notify all admins via standard fan-out

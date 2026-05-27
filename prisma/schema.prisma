@@ -263,7 +263,7 @@ model Donation {
 }
 
 // ───────────────────────────────
-// RECEIPTS — auto-issued donation receipts (section 46) via iCount.
+// RECEIPTS — receipts issued by the payment provider (Cardcom) on charge.
 // One receipt per successful charge: loan settlement OR direct donation.
 // We persist a row even on failure so admin can retry.
 // ───────────────────────────────
@@ -275,7 +275,7 @@ model Receipt {
   customerPhone String?
   description   String
 
-  // External (iCount) tracking
+  // External (Cardcom) tracking
   externalDocId  String?
   externalDocUrl String?
   status         ReceiptStatus @default(PENDING)
