@@ -33,6 +33,22 @@ export default function AboutPage() {
         <p className="font-bold text-primary">תצטרפו אלינו!</p>
       </div>
 
+      {/* Organization logos — above the CTAs */}
+      <div className="flex items-center justify-center gap-6">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/rogum.jpeg"
+          alt="רוג'ום — יזמות ציונית (ע״ר)"
+          className="h-24 w-auto object-contain mix-blend-multiply"
+        />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/kerenzion.jpeg"
+          alt="קרן ציון לפיתוח"
+          className="h-24 w-auto object-contain mix-blend-multiply"
+        />
+      </div>
+
       {/* Take part */}
       <section>
         <div className="flex items-center gap-2 mb-3">
@@ -85,20 +101,6 @@ export default function AboutPage() {
           <span className="font-bold text-primary">קרן ציון</span> לפיתוח
           חקלאות, התיישבות וקהילה.
         </p>
-        <div className="flex items-center justify-center gap-6 mt-1">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/rogum.jpeg"
-            alt="רוג'ום — יזמות ציונית (ע״ר)"
-            className="h-28 w-auto object-contain mix-blend-multiply"
-          />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/kerenzion.jpeg"
-            alt="קרן ציון לפיתוח"
-            className="h-28 w-auto object-contain mix-blend-multiply"
-          />
-        </div>
       </section>
     </div>
   );
