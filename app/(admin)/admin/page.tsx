@@ -21,19 +21,10 @@ export default async function AdminHomePage() {
   if (!session?.user) redirect("/login?callbackUrl=/admin");
   if (session.user.role !== "ADMIN") redirect("/");
 
-  const [
-    usersPending,
-    usersBanned,
-    gemachs,
-    tools,
-    activeLoans,
-    pendingLoans,
-    toolRequests,
-    gemachRequests,
-    toolDonations,
-    donationsTotal,
-    categoriesCount,
-  ] = await Promise.all([
+  // Promise.allSettled so one slow / failing query doesn't drag the whole
+  // dashboard into the error boundary — admins need *something* even if a
+  // single count flakes (pool exhaustion, DB latency, etc.).
+  const results = await Promise.allSettled([
     prisma.user.count({ where: { status: "PENDING", deletedAt: null } }),
     prisma.user.count({ where: { isBanned: true, deletedAt: null } }),
     prisma.gemach.count({ where: { isActive: true } }),
@@ -50,6 +41,41 @@ export default async function AdminHomePage() {
     prisma.category.count(),
   ]);
 
+  const failures = results
+    .map((r, i) => ({ r, i }))
+    .filter((x) => x.r.status === "rejected");
+  if (failures.length > 0) {
+    console.error(
+      `[admin.dashboard] ${failures.length}/${results.length} queries failed`,
+      failures.map(({ r, i }) => ({
+        index: i,
+        reason: (r as PromiseRejectedResult).reason,
+      }))
+    );
+  }
+
+  function num(idx: number): number {
+    const r = results[idx];
+    return r.status === "fulfilled" ? (r.value as number) : 0;
+  }
+  const usersPending = num(0);
+  const usersBanned = num(1);
+  const gemachs = num(2);
+  const tools = num(3);
+  const activeLoans = num(4);
+  const pendingLoans = num(5);
+  const toolRequests = num(6);
+  const gemachRequests = num(7);
+  const toolDonations = num(8);
+  const donationsAgg = results[9];
+  const donationsSum =
+    donationsAgg.status === "fulfilled"
+      ? ((donationsAgg.value as { _sum: { amount: number | null } })._sum
+          .amount ?? 0)
+      : 0;
+  const categoriesCount = num(10);
+  const hadFailures = failures.length > 0;
+
   return (
     <div className="px-4 py-6 flex flex-col gap-5">
       <header>
@@ -59,6 +85,13 @@ export default async function AdminHomePage() {
         </p>
       </header>
 
+      {hadFailures && (
+        <div className="rounded-xl border border-warning/40 bg-warning/10 px-3 py-2 text-xs text-text">
+          חלק מהמדדים לא נטענו כרגע ({failures.length}/{results.length}). נסה
+          לרענן בעוד רגע — הערכים שמופיעים כעת עשויים להיות חלקיים.
+        </div>
+      )}
+
       {/* Quick stats */}
       <section className="grid grid-cols-2 gap-3">
         <Stat icon={Users} value={usersPending} label="משתמשים ממתינים" attention={usersPending > 0} />
@@ -66,7 +99,7 @@ export default async function AdminHomePage() {
         <Stat icon={Sprout} value={gemachs} label="גמחים פעילים" />
         <Stat icon={Wrench} value={tools} label="כלים פעילים" />
         <Stat icon={Inbox} value={activeLoans} label="השאלות פעילות" />
-        <Stat icon={HandCoins} value={`₪${(donationsTotal._sum.amount ?? 0).toLocaleString("he-IL")}`} label="סך תרומות" />
+        <Stat icon={HandCoins} value={`₪${donationsSum.toLocaleString("he-IL")}`} label="סך תרומות" />
       </section>
 
       {/* Sections */}

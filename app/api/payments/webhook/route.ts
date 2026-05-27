@@ -1,5 +1,25 @@
 import { NextResponse } from "next/server";
+import { createHmac, timingSafeEqual } from "node:crypto";
 import { prisma } from "@/lib/prisma";
+
+/**
+ * Verify the HMAC signature Cardcom attaches to webhook payloads.
+ * Cardcom's IndicatorUrl callback can be configured to sign the request
+ * body with HMAC-SHA256 using the merchant's API password. The hex digest
+ * arrives in the X-Cardcom-Signature header. We use timingSafeEqual to
+ * avoid leaking validity via response timing.
+ */
+function verifyHmac(rawBody: string, header: string | null, secret: string): boolean {
+  if (!header) return false;
+  const expected = createHmac("sha256", secret).update(rawBody).digest("hex");
+  // Lengths must match for timingSafeEqual; otherwise it throws.
+  if (expected.length !== header.length) return false;
+  try {
+    return timingSafeEqual(Buffer.from(expected, "hex"), Buffer.from(header, "hex"));
+  } catch {
+    return false;
+  }
+}
 
 /**
  * POST /api/payments/webhook
@@ -22,17 +42,26 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "MISCONFIGURED" }, { status: 500 });
   }
 
+  let rawBody: string;
   let payload: URLSearchParams;
   try {
-    const text = await req.text();
-    payload = new URLSearchParams(text);
+    rawBody = await req.text();
+    payload = new URLSearchParams(rawBody);
   } catch {
     return NextResponse.json({ error: "INVALID_BODY" }, { status: 400 });
   }
 
-  // TODO – verify signature once Cardcom test integration is live.
-  // const sig = req.headers.get("x-cardcom-signature");
-  // if (!verifyHmac(text, sig, secret)) return 401
+  // Verify HMAC. Reject anything unsigned or with a bad signature — these
+  // could be spoofed status updates that would otherwise flip a loan to HELD
+  // without an actual deposit ever being taken.
+  const sig = req.headers.get("x-cardcom-signature");
+  if (!verifyHmac(rawBody, sig, secret)) {
+    console.warn("[payments.webhook] signature verification failed", {
+      hasHeader: !!sig,
+      bodyLength: rawBody.length,
+    });
+    return NextResponse.json({ error: "INVALID_SIGNATURE" }, { status: 401 });
+  }
 
   const responseCode = payload.get("ResponseCode");
   const loanId = payload.get("ReturnValue");

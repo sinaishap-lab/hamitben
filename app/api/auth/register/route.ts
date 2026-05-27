@@ -4,8 +4,30 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { registerSchema } from "@/lib/validation";
 import { notifyAdmins } from "@/lib/notifications";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
+  // Public endpoint — rate-limit by IP. 5 registration attempts per 10 min
+  // is enough for a real user retrying a typo'd password while still being
+  // a meaningful spam barrier.
+  const ip = getClientIp(req);
+  const rl = checkRateLimit(`register:${ip}`, {
+    windowMs: 10 * 60_000,
+    maxRequests: 5,
+  });
+  if (!rl.ok) {
+    return NextResponse.json(
+      {
+        error: "RATE_LIMITED",
+        message: "יותר מדי ניסיונות הרשמה. נסה שוב בעוד מספר דקות.",
+      },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rl.retryAfter) },
+      }
+    );
+  }
+
   let body: unknown;
   try {
     body = await req.json();

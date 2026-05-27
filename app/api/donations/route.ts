@@ -2,11 +2,32 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { donationSchema } from "@/lib/validation";
 import { getPaymentProvider } from "@/lib/payments";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 // POST /api/donations — one-time charge via PaymentProvider.
 // In stub mode the donation is recorded as COMPLETED immediately.
 // In Cardcom mode we redirect the user to the hosted page (TODO).
 export async function POST(req: Request) {
+  // Endpoint is public (guests can donate) — rate-limit by IP to prevent
+  // abuse. 5 requests / minute is plenty for a real human filling the form.
+  const ip = getClientIp(req);
+  const rl = checkRateLimit(`donations:${ip}`, {
+    windowMs: 60_000,
+    maxRequests: 5,
+  });
+  if (!rl.ok) {
+    return NextResponse.json(
+      {
+        error: "RATE_LIMITED",
+        message: "יותר מדי בקשות. נסה שוב בעוד רגע.",
+      },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rl.retryAfter) },
+      }
+    );
+  }
+
   let body: unknown;
   try {
     body = await req.json();

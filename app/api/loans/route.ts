@@ -10,6 +10,14 @@ import { formatDateHe } from "@/lib/utils";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+/** Thrown inside the loan-creation transaction to signal a 409 to the caller. */
+class ConflictError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ConflictError";
+  }
+}
+
 function startOfDay(d: Date): Date {
   const x = new Date(d);
   x.setHours(0, 0, 0, 0);
@@ -167,70 +175,56 @@ export async function POST(req: Request) {
     );
   }
 
-  // Conflict check – no overlap with PENDING/APPROVED/ACTIVE on same tool
-  const conflict = await prisma.loan.findFirst({
-    where: {
-      toolId: tool.id,
-      status: { in: ["PENDING", "APPROVED", "ACTIVE"] },
-      AND: [{ startDate: { lte: endDate } }, { endDate: { gte: startDate } }],
-    },
-    select: { id: true },
-  });
-  if (conflict) {
-    return NextResponse.json(
-      {
-        error: "CONFLICT",
-        message: "התאריכים שבחרת כבר תפוסים. בחר טווח אחר.",
-      },
-      { status: 409 }
-    );
-  }
-
   // Track whether this is the user's first loan – drives referral bonus
   const existingLoansCount = await prisma.loan.count({
     where: { userId: session.user.id },
   });
 
-  // Optionally consume a discount token (§16.2). Atomic with the loan
-  // insert so we never end up with a decremented balance but no loan.
-  let referralDiscountApplied = false;
-  if (useDiscountToken) {
-    const currentUser = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { discountTokens: true },
-    });
-    if ((currentUser?.discountTokens ?? 0) > 0) {
-      referralDiscountApplied = true;
-    }
-  }
-
-  let loan: { id: string; status: LoanStatus };
+  // Conflict check + token consumption + loan insert all run inside one
+  // transaction, serialized per-tool via a Postgres advisory lock. Without
+  // the lock two concurrent POSTs would both pass the conflict check and
+  // double-book the same tool. The lock auto-releases on commit/rollback.
+  // The discount-token decrement uses `updateMany` with `discountTokens > 0`
+  // so two parallel requests can't both spend the same token.
+  let loan: {
+    id: string;
+    status: LoanStatus;
+    referralDiscountApplied: boolean;
+  };
   try {
-    if (referralDiscountApplied) {
-      const [, created] = await prisma.$transaction([
-        prisma.user.update({
-          where: { id: session.user.id },
+    loan = await prisma.$transaction(async (tx) => {
+      // Per-tool serialization. hashtext()::bigint because the single-arg
+      // form of pg_advisory_xact_lock takes bigint.
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${tool.id})::bigint)`;
+
+      const conflict = await tx.loan.findFirst({
+        where: {
+          toolId: tool.id,
+          status: { in: ["PENDING", "APPROVED", "ACTIVE"] },
+          AND: [
+            { startDate: { lte: endDate } },
+            { endDate: { gte: startDate } },
+          ],
+        },
+        select: { id: true },
+      });
+      if (conflict) {
+        throw new ConflictError(
+          "התאריכים שבחרת כבר תפוסים. בחר טווח אחר."
+        );
+      }
+
+      let referralDiscountApplied = false;
+      if (useDiscountToken) {
+        // Atomic check-and-decrement — only matches if balance > 0.
+        const dec = await tx.user.updateMany({
+          where: { id: session.user.id, discountTokens: { gt: 0 } },
           data: { discountTokens: { decrement: 1 } },
-        }),
-        prisma.loan.create({
-          data: {
-            toolId: tool.id,
-            userId: session.user.id,
-            startDate,
-            endDate,
-            purpose: purpose ?? null,
-            depositAmount: tool.depositAmount,
-            dailyRate: tool.dailyRate,
-            status: "PENDING",
-            termsAcknowledgedAt: new Date(),
-            referralDiscountApplied: true,
-          },
-          select: { id: true, status: true },
-        }),
-      ]);
-      loan = created;
-    } else {
-      loan = await prisma.loan.create({
+        });
+        referralDiscountApplied = dec.count > 0;
+      }
+
+      return tx.loan.create({
         data: {
           toolId: tool.id,
           userId: session.user.id,
@@ -243,11 +237,18 @@ export async function POST(req: Request) {
           // only after deposit is HELD (immediate stub) or webhook fires.
           status: "PENDING",
           termsAcknowledgedAt: new Date(),
+          referralDiscountApplied,
         },
-        select: { id: true, status: true },
+        select: { id: true, status: true, referralDiscountApplied: true },
       });
-    }
+    });
   } catch (err) {
+    if (err instanceof ConflictError) {
+      return NextResponse.json(
+        { error: "CONFLICT", message: err.message },
+        { status: 409 }
+      );
+    }
     console.error("[loans.POST] insert failed", err);
     return NextResponse.json({ error: "SERVER" }, { status: 500 });
   }
@@ -265,8 +266,27 @@ export async function POST(req: Request) {
       });
     } catch (err) {
       console.error("[loans.POST] deposit hold failed", err);
-      // Roll back the loan so the user can retry cleanly.
-      await prisma.loan.delete({ where: { id: loan.id } });
+      // Roll back the loan AND refund the discount token (if one was
+      // consumed) so the user can retry cleanly. Atomically — we don't want
+      // a partial rollback where the loan vanishes but the token is gone.
+      try {
+        if (loan.referralDiscountApplied) {
+          await prisma.$transaction([
+            prisma.loan.delete({ where: { id: loan.id } }),
+            prisma.user.update({
+              where: { id: session.user.id },
+              data: { discountTokens: { increment: 1 } },
+            }),
+          ]);
+        } else {
+          await prisma.loan.delete({ where: { id: loan.id } });
+        }
+      } catch (rollbackErr) {
+        console.error(
+          "[loans.POST] rollback after deposit hold failure ALSO failed",
+          rollbackErr
+        );
+      }
       return NextResponse.json(
         {
           error: "PAYMENT_FAILED",
