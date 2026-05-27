@@ -31,6 +31,22 @@ export async function TopBar() {
           <span>המתבן</span>
         </Link>
 
+        {/* Organization logos — center of TopBar */}
+        <div className="flex items-center gap-3 shrink-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/rogum.jpeg"
+            alt="רוג'ום"
+            className="h-7 w-auto object-contain mix-blend-multiply"
+          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/kerenzion.jpeg"
+            alt="קרן ציון"
+            className="h-7 w-auto object-contain mix-blend-multiply"
+          />
+        </div>
+
         <div className="flex items-center gap-2">
           {/* PWA install — surfaces itself only when the browser fires
               `beforeinstallprompt` (and disappears after install). */}
