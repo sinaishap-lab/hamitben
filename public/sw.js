@@ -5,7 +5,7 @@
 //   3. Network-first for everything else with cache fallback
 //   4. Web push handler with click-to-focus
 
-const VERSION = "v1";
+const VERSION = "v2"; // bumped after image-optimization refactor
 const SHELL_CACHE = `hamitben-shell-${VERSION}`;
 const DATA_CACHE = `hamitben-data-${VERSION}`;
 const SHELL_ASSETS = [
@@ -41,6 +41,8 @@ function isStaleWhileRevalidateTarget(url) {
   if (url.pathname.startsWith("/api/tools")) return true;
   if (url.pathname.startsWith("/catalog")) return true;
   if (url.hostname === "res.cloudinary.com") return true;
+  // Cache next/image optimised variants (WebP/AVIF) so repeated views are instant
+  if (url.pathname.startsWith("/_next/image")) return true;
   return false;
 }
 

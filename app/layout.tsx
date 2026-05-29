@@ -7,7 +7,7 @@ import { Providers } from "@/components/providers";
 
 const heebo = Heebo({
   subsets: ["hebrew", "latin"],
-  weight: ["300", "400", "500", "700", "900"],
+  weight: ["400", "500", "700", "900"], // 300 (thin) unused — saves one font file
   variable: "--font-heebo",
   display: "swap",
 });
