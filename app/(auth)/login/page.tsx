@@ -104,20 +104,21 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="px-4 py-6 flex flex-col gap-6">
+    <div className="px-4 py-6 flex flex-col gap-8">
 
-      {/* Who we are — top of page, first thing a visitor sees */}
-      <section className="bg-primary-50/50 rounded-2xl border border-primary-100/60 p-4 flex flex-col gap-3 text-center">
-        <h2 className="font-bold text-base text-primary">מי אנחנו?</h2>
-        <p className="text-xs leading-relaxed text-text">
+      {/* מי אנחנו — כותרת גדולה + טקסט חופשי + לוגואים */}
+      <section className="flex flex-col gap-4 text-center">
+        <h1 className="text-3xl font-bold text-primary tracking-tight">
+          מי אנחנו
+        </h1>
+        <p className="text-sm leading-relaxed text-text">
           המתבן הוא פלטפורמה חברתית מבית{" "}
-          <span className="font-semibold">קרן ציון לפיתוח</span> — להשאלת
-          כלי עבודה חקלאיים בין חברי קהילת החקלאים שלנו בישראל. במקום שכל
-          חקלאי יקנה לעצמו מחרשה, מקלטרת או מגוב, אנחנו מאגדים את הכלים
-          בגמ&quot;חים שיתופיים — כך לכולם יש את כל הכלים.
+          <span className="font-bold text-primary">קרן ציון לפיתוח</span> —
+          להשאלת כלי עבודה חקלאיים בין חברי קהילת החקלאים שלנו בישראל.
+          במקום שכל חקלאי יקנה לעצמו מחרשה, מקלטרת או מגוב, אנחנו מאגדים
+          את הכלים בגמ&quot;חים שיתופיים — כך לכולם יש את כל הכלים.
         </p>
-        {/* Organization logos */}
-        <div className="flex items-center justify-center gap-6 pt-1">
+        <div className="flex items-center justify-center gap-6">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/rogum.jpeg"
@@ -133,23 +134,24 @@ export default function LoginPage() {
         </div>
       </section>
 
-      <header>
-        <h1 className="text-2xl font-bold text-primary">כניסה</h1>
-        <p className="text-sm text-text-muted mt-1">
-          ברוכים השבים למתבן
+      {/* טופס כניסה בקופסה עם רקע */}
+      <section className="bg-bg-surface rounded-2xl border border-primary-100 shadow-card p-5 flex flex-col gap-5">
+        <header>
+          <h2 className="text-xl font-bold text-primary">כניסה</h2>
+          <p className="text-sm text-text-muted mt-0.5">ברוכים השבים למתבן</p>
+        </header>
+
+        <Suspense fallback={<div className="text-text-muted">טוען...</div>}>
+          <LoginForm />
+        </Suspense>
+
+        <p className="text-center text-sm text-text-muted">
+          עדיין לא רשום?{" "}
+          <Link href="/register" className="text-primary font-medium">
+            הרשמה
+          </Link>
         </p>
-      </header>
-
-      <Suspense fallback={<div className="text-text-muted">טוען...</div>}>
-        <LoginForm />
-      </Suspense>
-
-      <p className="text-center text-sm text-text-muted">
-        עדיין לא רשום?{" "}
-        <Link href="/register" className="text-primary font-medium">
-          הרשמה
-        </Link>
-      </p>
+      </section>
 
       {/* Illustration */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
