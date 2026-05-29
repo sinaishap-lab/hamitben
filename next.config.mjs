@@ -2,6 +2,11 @@
 const nextConfig = {
   images: {
     remotePatterns: [{ protocol: "https", hostname: "res.cloudinary.com" }],
+    // Serve AVIF first (best compression), then WebP as fallback
+    formats: ["image/avif", "image/webp"],
+    // Allow next/image to serve larger widths for high-DPI screens
+    deviceSizes: [360, 480, 640, 750, 828, 1080, 1200],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256],
   },
   async headers() {
     return [
@@ -21,6 +26,17 @@ const nextConfig = {
           {
             key: "Strict-Transport-Security",
             value: "max-age=63072000; includeSubDomains; preload",
+          },
+        ],
+      },
+      {
+        // Static images/fonts: cache 1 year in browser.
+        // Next.js /_next/static assets are already immutable; these are /public ones.
+        source: "/:path*\\.(png|jpe?g|gif|svg|ico|webp|avif|woff2?)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
           },
         ],
       },

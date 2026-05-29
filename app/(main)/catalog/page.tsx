@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import { unstable_cache } from "next/cache";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
@@ -12,6 +13,29 @@ import { formatDateHe } from "@/lib/utils";
 export const dynamic = "force-dynamic";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+
+// These queries change infrequently — cache them at the data layer so
+// every catalog request doesn't round-trip to Supabase for static lookups.
+const getCachedCategories = unstable_cache(
+  () =>
+    prisma.category.findMany({
+      orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+      select: { id: true, name: true, icon: true },
+    }),
+  ["categories"],
+  { revalidate: 300 } // 5 minutes
+);
+
+const getCachedGemachs = unstable_cache(
+  () =>
+    prisma.gemach.findMany({
+      where: { isActive: true },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    }),
+  ["gemachs"],
+  { revalidate: 60 } // 1 minute
+);
 const NEW_TOOL_DAYS = 14; // tools added within this window get a "חדש" badge
 const IN_DEMAND_LOANS = 5; // loan count at/above which a tool is "מבוקש"
 
@@ -89,15 +113,8 @@ export default async function CatalogPage({
         _count: { select: { waitlist: true, loans: true } },
       },
     }),
-    prisma.gemach.findMany({
-      where: { isActive: true },
-      orderBy: { name: "asc" },
-      select: { id: true, name: true },
-    }),
-    prisma.category.findMany({
-      orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
-      select: { id: true, name: true, icon: true },
-    }),
+    getCachedGemachs(),   // cached 1 min — avoids a DB round-trip per request
+    getCachedCategories(), // cached 5 min — changes only via admin panel
     userId
       ? prisma.favorite.findMany({
           where: { userId },

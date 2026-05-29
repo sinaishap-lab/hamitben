@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { HandCoins, Wrench, Globe } from "lucide-react";
 import type { Metadata } from "next";
 
@@ -35,16 +36,18 @@ export default function AboutPage() {
 
       {/* Organization logos — above the CTAs */}
       <div className="flex items-center justify-center gap-6">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src="/rogum.jpeg"
           alt="רוג'ום — יזמות ציונית (ע״ר)"
+          width={160}
+          height={96}
           className="h-24 w-auto object-contain mix-blend-multiply"
         />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src="/kerenzion.jpeg"
           alt="קרן ציון לפיתוח"
+          width={160}
+          height={96}
           className="h-24 w-auto object-contain mix-blend-multiply"
         />
       </div>

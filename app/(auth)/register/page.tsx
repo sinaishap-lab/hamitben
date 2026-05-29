@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent, Suspense } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -186,12 +187,14 @@ export default function RegisterPage() {
 
       {/* Illustration — below the form + login link, full opacity.
           mix-blend-multiply lets the page background show through the
-          image's white pixels, mimicking a transparent background. */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+          image's white pixels, mimicking a transparent background.
+          Lazy loaded (below fold) — no priority needed. */}
+      <Image
         src="/harshamapage.png"
         alt=""
         aria-hidden
+        width={480}
+        height={480}
         className="w-full h-auto mix-blend-multiply"
       />
     </div>

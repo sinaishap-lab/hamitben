@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent, Suspense } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn, getSession } from "next-auth/react";
 import { Button } from "@/components/ui/Button";
@@ -119,17 +120,22 @@ export default function LoginPage() {
           את הכלים בגמ&quot;חים שיתופיים — כך לכולם יש את כל הכלים.
         </p>
         <div className="flex items-center justify-center gap-6">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          {/* priority — above fold on login page */}
+          <Image
             src="/rogum.jpeg"
             alt="רוג'ום — יזמות ציונית (ע״ר)"
+            width={120}
+            height={64}
             className="h-16 w-auto object-contain mix-blend-multiply"
+            priority
           />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src="/kerenzion.jpeg"
             alt="קרן ציון לפיתוח"
+            width={120}
+            height={64}
             className="h-16 w-auto object-contain mix-blend-multiply"
+            priority
           />
         </div>
       </section>
@@ -153,12 +159,13 @@ export default function LoginPage() {
         </p>
       </section>
 
-      {/* Illustration */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      {/* Illustration — lazy loaded, below fold */}
+      <Image
         src="/dafknisa.png"
         alt=""
         aria-hidden
+        width={480}
+        height={480}
         className="w-full h-auto mix-blend-multiply"
       />
     </div>

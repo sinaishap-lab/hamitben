@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Shield } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { InstallAppButton } from "@/components/pwa/InstallAppButton";
@@ -21,29 +22,36 @@ export async function TopBar() {
           href={logoHref}
           className="flex items-center gap-2.5 text-primary font-bold text-lg"
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          {/* priority — above-fold, preload immediately */}
+          <Image
             src="/logo.png"
             alt=""
+            width={36}
+            height={36}
             className="w-9 h-9 rounded-xl shadow-soft object-contain bg-bg-surface"
             aria-hidden
+            priority
           />
           <span>המתבן</span>
         </Link>
 
         {/* Organization logos — center of TopBar */}
         <div className="flex items-center gap-3 shrink-0">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src="/rogum.jpeg"
             alt="רוג'ום"
+            width={80}
+            height={28}
             className="h-7 w-auto object-contain mix-blend-multiply"
+            priority
           />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src="/kerenzion.jpeg"
             alt="קרן ציון"
+            width={80}
+            height={28}
             className="h-7 w-auto object-contain mix-blend-multiply"
+            priority
           />
         </div>
 

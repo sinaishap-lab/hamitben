@@ -216,12 +216,13 @@ export default async function MyLoansPage({
         </ul>
       )}
 
-      {/* Illustration — always visible, below the loans list. */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      {/* Illustration — lazy loaded, below the loans list. */}
+      <Image
         src="/hahashalot.png"
         alt=""
         aria-hidden
+        width={320}
+        height={320}
         className="w-full max-w-xs h-auto mx-auto mix-blend-multiply mt-2"
       />
     </div>
